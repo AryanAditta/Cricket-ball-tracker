@@ -1,0 +1,16 @@
+i,kind,speed_kmh,ok,bounce_err_cm,stumps_x_err_cm,stumps_z_err_cm,speed_err_kmh,call,true_call,notes
+0,pace,145.6,1,2.101922652562573,0.43717436060915216,0.025447850393189864,0.1309115720410432,missing,missing,end_bowler: 63 candidates -> 60 on the ball track | side_off: 62 candidates -> 60 on the ball track
+1,pace,121.3,1,1.7793221719002772,0.5836339365629495,0.26020811805462785,0.23190012396791815,missing,missing,end_bowler: 79 candidates -> 73 on the ball track | side_off: 79 candidates -> 73 on the ball track
+2,pace,126.0,1,1.5560770413184397,0.12260146882253076,0.00826227257892942,0.1536473679647372,missing,missing,end_bowler: 74 candidates -> 68 on the ball track | side_off: 74 candidates -> 68 on the ball track
+3,spin,81.2,1,3.341590771552166,0.2939969131625725,0.8092815618727767,0.02261062252675572,missing,missing,end_bowler: 100 candidates -> 91 on the ball track | side_off: 103 candidates -> 98 on the ball track
+4,pace,114.8,1,0.3778626579759541,0.6776744051265049,0.32091736799779724,0.07993216306822148,missing,missing,end_bowler: 64 candidates -> 59 on the ball track | side_off: 81 candidates -> 71 on the ball track
+5,pace,145.9,1,2.7746201505790347,0.08975153101009603,0.40199824657188854,0.022433647518823818,missing,missing,end_bowler: 65 candidates -> 57 on the ball track | side_off: 63 candidates -> 57 on the ball track
+6,pace,129.3,1,3.543048026451656,0.2766342978746894,0.09431168232986176,0.12142414901902043,missing,missing,end_bowler: 70 candidates -> 66 on the ball track | side_off: 68 candidates -> 66 on the ball track
+7,pace,119.0,1,3.7432813178574387,2.3043203157356085,1.5419863235264257,0.39720235821690153,missing,missing,end_bowler: 58 candidates -> 52 on the ball track | side_off: 73 candidates -> 68 on the ball track
+8,pace,145.2,1,3.337373260780257,0.28241310343300463,0.031508939138064074,0.1331863270418694,missing,missing,end_bowler: 57 candidates -> 55 on the ball track | side_off: 64 candidates -> 55 on the ball track
+9,pace,115.6,1,6.348102032837104,0.3675800367452742,1.0450661123354132,0.5322052873052314,hitting,hitting,end_bowler: 58 candidates -> 51 on the ball track | side_off: 77 candidates -> 71 on the ball track
+10,spin,73.9,1,4.355570649968436,0.4041387324302037,0.7268771816593134,0.4340070822372155,missing,missing,end_bowler: 112 candidates -> 104 on the ball track | side_off: 118 candidates -> 112 on the ball track
+11,pace,122.5,1,4.1581889612576735,1.2044349005544575,2.6011388334634455,0.10292232048267635,missing,missing,end_bowler: 63 candidates -> 56 on the ball track | side_off: 75 candidates -> 66 on the ball track
+12,pace,108.8,1,2.679714524761179,0.27017672693174233,0.07312175327662818,0.12385859207938665,missing,missing,end_bowler: 82 candidates -> 78 on the ball track | side_off: 92 candidates -> 79 on the ball track
+13,pace,119.6,1,1.660950272548083,0.04794083087399925,0.08787168568745729,0.012058738776161704,missing,missing,end_bowler: 75 candidates -> 72 on the ball track | side_off: 76 candidates -> 72 on the ball track
+14,pace,120.6,1,0.3959443085934626,0.1393668265580572,0.3221225357402713,0.02814263066500189,missing,missing,end_bowler: 67 candidates -> 52 on the ball track | side_off: 81 candidates -> 70 on the ball track

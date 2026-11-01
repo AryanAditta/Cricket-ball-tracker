@@ -1,0 +1,49 @@
+{
+  "status": "NO DECISION: projection too uncertain (+/-380 cm)",
+  "bounce_xy_m": [
+    0.144,
+    6.242
+  ],
+  "bounce_sigma_m": [
+    0.254,
+    0.346
+  ],
+  "impact_xyz_m": [
+    0.319,
+    0.679,
+    0.596
+  ],
+  "stumps_xz_m": [
+    0.347,
+    0.634
+  ],
+  "stumps_sigma_m": [
+    1.9,
+    0.378
+  ],
+  "release_speed_kmh": 139.4,
+  "pitching": "in line",
+  "impact": "outside off",
+  "wickets": "inconclusive",
+  "wickets_confidence": {
+    "hitting": 0.045,
+    "umpires call": 0.015,
+    "missing": 0.94
+  },
+  "rms_px": 2.67,
+  "n_obs": 76,
+  "n_inliers": 48,
+  "n_after_bounce": 23,
+  "truth": {
+    "bounce_xy_m": [
+      0.099,
+      6.511
+    ],
+    "stumps_xz_m": [
+      0.252,
+      0.639
+    ],
+    "speed_kmh": 132.0,
+    "wickets": "missing"
+  }
+}

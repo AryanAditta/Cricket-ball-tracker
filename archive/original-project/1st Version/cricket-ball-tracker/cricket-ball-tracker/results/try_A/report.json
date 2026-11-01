@@ -1,0 +1,49 @@
+{
+  "status": "ok",
+  "bounce_xy_m": [
+    0.143,
+    5.514
+  ],
+  "bounce_sigma_m": [
+    0.003,
+    0.015
+  ],
+  "impact_xyz_m": [
+    0.111,
+    0.785,
+    0.494
+  ],
+  "stumps_xz_m": [
+    0.101,
+    0.547
+  ],
+  "stumps_sigma_m": [
+    0.007,
+    0.007
+  ],
+  "release_speed_kmh": 140.4,
+  "pitching": "in line",
+  "impact": "in line",
+  "wickets": "hitting",
+  "wickets_confidence": {
+    "hitting": 0.955,
+    "umpires call": 0.045,
+    "missing": 0.0
+  },
+  "rms_px": 0.74,
+  "n_obs": 112,
+  "n_inliers": 112,
+  "n_after_bounce": 40,
+  "truth": {
+    "bounce_xy_m": [
+      0.15,
+      5.504
+    ],
+    "stumps_xz_m": [
+      0.108,
+      0.552
+    ],
+    "speed_kmh": 140.0,
+    "wickets": "hitting"
+  }
+}

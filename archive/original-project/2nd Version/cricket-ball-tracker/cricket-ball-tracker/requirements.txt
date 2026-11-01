@@ -1,0 +1,11 @@
+numpy
+scipy
+opencv-python
+matplotlib
+imageio-ffmpeg
+# optional: trained detector
+# ultralytics
+# optional: render replay videos from the command line
+# playwright
+# tests
+pytest

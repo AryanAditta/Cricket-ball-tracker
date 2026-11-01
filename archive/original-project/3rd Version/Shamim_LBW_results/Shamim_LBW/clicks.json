@@ -1,0 +1,48 @@
+{
+ "video": "shamim.mp4",
+ "shot": [
+  39,
+  218
+ ],
+ "points": {
+  "bowler_popping_crease_L": [
+   737.03,
+   677.81
+  ],
+  "bowler_popping_crease_R": [
+   1531.35,
+   676.26
+  ],
+  "bowler_bowling_crease_L": [
+   727.74,
+   722.71
+  ],
+  "bowler_bowling_crease_R": [
+   1537.55,
+   721.16
+  ],
+  "striker_popping_crease_L": [
+   846.97,
+   196.26
+  ],
+  "striker_popping_crease_R": [
+   1460.13,
+   191.61
+  ],
+  "striker_bowling_crease_L": [
+   853.16,
+   169.94
+  ],
+  "striker_bowling_crease_R": [
+   1457.03,
+   166.84
+  ]
+ },
+ "handed": "left",
+ "on_field": "out",
+ "foot": [
+  1158.19,
+  211.74
+ ],
+ "foot_frame": 129
+}

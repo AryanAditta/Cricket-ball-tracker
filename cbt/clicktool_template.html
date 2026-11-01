@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibration clicks</title>
+<style>
+:root { --bg:#0b1520; --panel:#13212f; --line:#24384b; --ink:#e6edf3; --mute:#8fa3b6; --acc:#2bb673;
+        --warn:#e8a33d; --bad:#d8352a; --sel:#ffd84a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+             font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+#app { display: grid; grid-template-columns: 1fr 360px; height: 100vh; }
+#stage { position: relative; overflow: hidden; background: #000; cursor: crosshair; }
+#stage canvas { position: absolute; left: 0; top: 0; }
+#stage #loupe { position: absolute; left: auto; right: 12px; top: 12px; width: 220px; height: 220px; border: 2px solid var(--sel);
+         border-radius: 6px; background: #000; pointer-events: none; }
+#hint { position: absolute; left: 12px; bottom: 12px; right: 250px; background: rgba(11,21,32,.86);
+        padding: 10px 14px; border-radius: 8px; border-left: 4px solid var(--sel); font-size: 15px; }
+#hint b { color: var(--sel); }
+aside { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 14px 16px; }
+h1 { font-size: 16px; margin: 0 0 2px; letter-spacing: .04em; }
+.sub { color: var(--mute); font-size: 12px; margin-bottom: 12px; }
+h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--mute); margin: 16px 0 6px; }
+.seg { display: flex; gap: 4px; margin-bottom: 8px; }
+.seg button { flex: 1; }
+button { background: #1c3145; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px;
+         cursor: pointer; font: inherit; }
+button:hover { border-color: #3d5a75; }
+button.on { background: var(--acc); border-color: var(--acc); color: #04150c; font-weight: 600; }
+button.primary { background: var(--acc); border-color: var(--acc); color: #04150c; font-weight: 700; width: 100%; padding: 10px; }
+ol { list-style: none; padding: 0; margin: 0; }
+li { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 6px; padding: 6px 8px;
+     border-radius: 6px; cursor: pointer; border: 1px solid transparent; }
+li:hover { background: #182a3b; }
+li.cur { border-color: var(--sel); background: #1d2f22; }
+li .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--mute); }
+li.done .dot { background: var(--acc); border-color: var(--acc); }
+li.skip .dot { border-style: dashed; }
+li .xy { color: var(--mute); font-variant-numeric: tabular-nums; font-size: 12px; }
+li small { display: block; color: var(--mute); font-size: 11.5px; }
+.row { display: flex; gap: 6px; align-items: center; margin: 6px 0; }
+.row label { width: 110px; color: var(--mute); font-size: 12.5px; }
+.row input, .row select { flex: 1; background: #0d1a26; color: var(--ink); border: 1px solid var(--line);
+                          border-radius: 6px; padding: 5px 7px; font: inherit; min-width: 0; }
+#scrub { width: 100%; }
+#frameinfo { color: var(--mute); font-size: 12px; font-variant-numeric: tabular-nums; }
+pre { background: #0d1a26; border: 1px solid var(--line); border-radius: 6px; padding: 8px; font-size: 11px;
+      max-height: 160px; overflow: auto; white-space: pre-wrap; }
+.note { color: var(--mute); font-size: 12px; }
+.warn { color: var(--warn); }
+kbd { background: #0d1a26; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-size: 11px; }
+@media (max-width: 900px) { #app { grid-template-columns: 1fr; grid-template-rows: 60vh auto; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <canvas id="loupe" width="220" height="220"></canvas>
+    <div id="hint"></div>
+  </div>
+  <aside>
+    <h1>CALIBRATION CLICKS</h1>
+    <div class="sub" id="src"></div>
+
+    <h2>1 · Image</h2>
+    <div class="seg">
+      <button id="vBg" class="on" title="median of the shot: players removed, best for crease corners">Pitch (players removed)</button>
+      <button id="vFr">Video frame</button>
+    </div>
+    <div id="frameBox" style="display:none">
+      <input type="range" id="scrub" min="0" max="0" value="0">
+      <div class="row"><button id="prev">◀ frame</button><button id="next">frame ▶</button>
+        <span id="frameinfo"></span></div>
+    </div>
+    <div class="note">Scroll to zoom · drag with the right mouse button (or hold <kbd>Space</kbd>) to pan ·
+      <kbd>←↑→↓</kbd> nudge the selected point by ¼ px · <kbd>S</kbd> skip</div>
+
+    <h2>2 · Points</h2>
+    <ol id="list"></ol>
+    <div class="note" style="margin-top:6px">Click where the <b>inner edges</b> of the painted lines cross —
+      the software snaps to the exact line centres. At least 6 crease points are needed; all 8 is best.
+      Skip any that are hidden by a player or the umpire.</div>
+
+    <h2>3 · Delivery</h2>
+    <div class="row"><label>Batter</label><select id="handed"><option value="right">right-handed</option><option value="left">left-handed</option></select></div>
+    <div class="row"><label>On-field call</label><select id="onfield"><option value="not out">not out</option><option value="out">out</option></select></div>
+    <div class="row"><label>Bowler type</label><select id="bowler"><option value="">(no speed prior)</option><option>pace</option><option>medium</option><option>spin</option></select></div>
+    <div class="row"><label>Speed gun km/h</label><input id="speed" type="number" step="0.1" placeholder="if shown on screen"></div>
+    <div class="row"><label>Shot frames</label><input id="shotA" type="number"><input id="shotB" type="number"></div>
+
+    <h2>4 · Save</h2>
+    <button class="primary" id="save">Download clicks.json</button>
+    <p class="note" id="cmd"></p>
+    <pre id="json"></pre>
+  </aside>
+</div>
+<video id="vid" muted playsinline preload="auto" style="display:none"></video>
+<script>
+const D = __DATA__;
+const POINTS = D.points.map(p => ({ ...p, uv: null, skipped: false }));
+POINTS.push({ name: "foot", label: "Front foot at impact",
+  help: "Switch to <b>Video frame</b>, step to the frame where the ball hits the pad, and click where the batter's FRONT FOOT (toe end of the shoe) touches the ground.", uv: null, skipped: false });
+let cur = 0, view = "bg", frame = D.impact_frame_guess ?? 0;
+const $ = (id) => document.getElementById(id);
+const cv = $("cv"), ctx = cv.getContext("2d"), loupe = $("loupe"), lctx = loupe.getContext("2d");
+const bg = new Image(); bg.src = D.background;
+const vid = $("vid"); vid.src = D.video;
+const W = D.size[0], H = D.size[1];
+let zoom = 1, ox = 0, oy = 0, mouse = null;
+$("src").textContent = `${D.source} · ${W}×${H} · shot frames ${D.shot[0]}–${D.shot[1]}`;
+$("shotA").value = D.shot[0]; $("shotB").value = D.shot[1];
+if (D.prefill) for (const p of POINTS) if (D.prefill[p.name]) p.uv = D.prefill[p.name];
+
+function fit() {
+  const r = $("stage").getBoundingClientRect();
+  cv.width = r.width * devicePixelRatio; cv.height = r.height * devicePixelRatio;
+  cv.style.width = r.width + "px"; cv.style.height = r.height + "px";
+  zoom = Math.min(cv.width / W, cv.height / H); ox = (cv.width - W * zoom) / 2; oy = (cv.height - H * zoom) / 2;
+  draw();
+}
+const toImg = (x, y) => [(x * devicePixelRatio - ox) / zoom, (y * devicePixelRatio - oy) / zoom];
+function src() { return view === "bg" ? bg : vid; }
+function draw() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(zoom, 0, 0, zoom, ox, oy);
+  ctx.imageSmoothingEnabled = zoom < 2;
+  try { ctx.drawImage(src(), 0, 0, W, H); } catch (e) {}
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  POINTS.forEach((p, i) => {
+    if (!p.uv) return;
+    const x = p.uv[0] * zoom + ox, y = p.uv[1] * zoom + oy, s = 9 * devicePixelRatio;
+    ctx.strokeStyle = i === cur ? "#ffd84a" : (p.name === "foot" ? "#4aa3ff" : "#2bb673");
+    ctx.lineWidth = 2 * devicePixelRatio;
+    ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x - 3, y); ctx.moveTo(x + 3, y); ctx.lineTo(x + s, y);
+    ctx.moveTo(x, y - s); ctx.lineTo(x, y - 3); ctx.moveTo(x, y + 3); ctx.lineTo(x, y + s); ctx.stroke();
+    ctx.fillStyle = ctx.strokeStyle; ctx.font = `${12 * devicePixelRatio}px system-ui`;
+    ctx.fillText(p.short || p.name, x + s + 3, y - 4);
+  });
+  drawLoupe();
+}
+function drawLoupe() {
+  lctx.fillStyle = "#000"; lctx.fillRect(0, 0, 220, 220);
+  const c = mouse || (POINTS[cur].uv ? POINTS[cur].uv : null);
+  if (!c) return;
+  const m = 8, half = 220 / m / 2;
+  lctx.imageSmoothingEnabled = false;
+  try { lctx.drawImage(src(), c[0] - half, c[1] - half, 2 * half, 2 * half, 0, 0, 220, 220); } catch (e) {}
+  lctx.strokeStyle = "rgba(255,216,74,.9)"; lctx.lineWidth = 1;
+  lctx.beginPath(); lctx.moveTo(110, 0); lctx.lineTo(110, 95); lctx.moveTo(110, 125); lctx.lineTo(110, 220);
+  lctx.moveTo(0, 110); lctx.lineTo(95, 110); lctx.moveTo(125, 110); lctx.lineTo(220, 110); lctx.stroke();
+  const p = POINTS[cur].uv;
+  if (p && mouse) {
+    const x = 110 + (p[0] - c[0]) * m, y = 110 + (p[1] - c[1]) * m;
+    lctx.strokeStyle = "#2bb673"; lctx.beginPath(); lctx.arc(x, y, 5, 0, 7); lctx.stroke();
+  }
+}
+function renderList() {
+  const ol = $("list"); ol.innerHTML = "";
+  POINTS.forEach((p, i) => {
+    const li = document.createElement("li");
+    li.className = (i === cur ? "cur " : "") + (p.uv ? "done " : "") + (p.skipped ? "skip" : "");
+    li.innerHTML = `<span class="dot"></span><span>${p.label}<small>${p.skipped ? "skipped" : ""}</small></span>
+      <span class="xy">${p.uv ? p.uv[0].toFixed(1) + ", " + p.uv[1].toFixed(1) : ""}</span>`;
+    li.onclick = () => { cur = i; if (p.name === "foot") setView("frame"); update(); };
+    ol.appendChild(li);
+  });
+  const p = POINTS[cur];
+  $("hint").innerHTML = `<b>${cur + 1}/${POINTS.length} · ${p.label}</b> — ${p.help}`;
+}
+function payload() {
+  const pts = {};
+  POINTS.forEach(p => { if (p.uv && p.name !== "foot") pts[p.name] = p.uv.map(v => +v.toFixed(2)); });
+  const foot = POINTS.find(p => p.name === "foot");
+  const out = { video: D.source, shot: [+$("shotA").value, +$("shotB").value], points: pts,
+                handed: $("handed").value, on_field: $("onfield").value };
+  if (foot.uv) { out.foot = foot.uv.map(v => +v.toFixed(2)); out.foot_frame = foot.frame; }
+  if ($("bowler").value) out.bowler = $("bowler").value;
+  if ($("speed").value) out.speed_kmh = +$("speed").value;
+  return out;
+}
+function update() {
+  renderList(); draw();
+  const P = payload(), n = Object.keys(P.points).length;
+  $("json").textContent = JSON.stringify(P, null, 1);
+  $("cmd").innerHTML = n < 6 ? `<span class="warn">${n}/8 crease points — at least 6 needed.</span>`
+    : `Then run:<br><code>python -m cbt broadcast "${D.source}" --clicks clicks.json --handed ${P.handed} --on-field ${P.on_field.replace(" ", "-")}</code>`
+      + (P.foot ? "" : `<br><span class="warn">No front-foot click: the result will be less certain.</span>`);
+}
+function next() { const k = POINTS.findIndex((p, i) => i > cur && !p.uv && !p.skipped); if (k >= 0) cur = k;
+  if (POINTS[cur].name === "foot") setView("frame"); }
+function setView(v) {
+  view = v; $("vBg").classList.toggle("on", v === "bg"); $("vFr").classList.toggle("on", v === "frame");
+  $("frameBox").style.display = v === "frame" ? "" : "none";
+  if (v === "frame") seek(frame); else draw();
+}
+function seek(f) {
+  frame = Math.max(D.shot[0], Math.min(D.shot[1], f)); $("scrub").value = frame;
+  $("frameinfo").textContent = `frame ${frame}`;
+  vid.currentTime = (frame - D.shot[0] + 0.5) / D.fps;
+}
+vid.addEventListener("seeked", draw);
+$("scrub").min = D.shot[0]; $("scrub").max = D.shot[1];
+$("scrub").oninput = (e) => seek(+e.target.value);
+$("prev").onclick = () => seek(frame - 1); $("next").onclick = () => seek(frame + 1);
+$("vBg").onclick = () => setView("bg"); $("vFr").onclick = () => setView("frame");
+["handed", "onfield", "bowler", "speed", "shotA", "shotB"].forEach(id => $(id).onchange = update);
+if (D.handed) $("handed").value = D.handed;
+
+let panning = false, space = false, last = null;
+cv.addEventListener("contextmenu", e => e.preventDefault());
+cv.addEventListener("mousedown", e => {
+  if (e.button === 2 || space) { panning = true; last = [e.clientX, e.clientY]; return; }
+  const [u, v] = toImg(e.offsetX, e.offsetY);
+  if (u < 0 || v < 0 || u > W || v > H) return;
+  const p = POINTS[cur]; p.uv = [u, v]; p.skipped = false;
+  if (p.name === "foot") p.frame = frame;
+  next(); update();
+});
+window.addEventListener("mouseup", () => panning = false);
+cv.addEventListener("mousemove", e => {
+  if (panning) { ox += (e.clientX - last[0]) * devicePixelRatio; oy += (e.clientY - last[1]) * devicePixelRatio;
+                 last = [e.clientX, e.clientY]; draw(); return; }
+  mouse = toImg(e.offsetX, e.offsetY); drawLoupe();
+});
+cv.addEventListener("mouseleave", () => { mouse = null; drawLoupe(); });
+cv.addEventListener("wheel", e => {
+  e.preventDefault();
+  const k = Math.exp(-e.deltaY * 0.0015), x = e.offsetX * devicePixelRatio, y = e.offsetY * devicePixelRatio;
+  ox = x - (x - ox) * k; oy = y - (y - oy) * k; zoom *= k; draw();
+}, { passive: false });
+window.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  if (e.code === "Space") { space = true; e.preventDefault(); }
+  const p = POINTS[cur], d = { ArrowLeft: [-.25, 0], ArrowRight: [.25, 0], ArrowUp: [0, -.25], ArrowDown: [0, .25] }[e.key];
+  if (d && p.uv) { p.uv = [p.uv[0] + d[0], p.uv[1] + d[1]]; update(); e.preventDefault(); }
+  if (e.key === "s" || e.key === "S") { p.skipped = true; p.uv = null; next(); update(); }
+  if (view === "frame" && (e.key === "," || e.key === "<")) seek(frame - 1);
+  if (view === "frame" && (e.key === "." || e.key === ">")) seek(frame + 1);
+});
+window.addEventListener("keyup", e => { if (e.code === "Space") space = false; });
+$("save").onclick = () => {
+  const blob = new Blob([JSON.stringify(payload(), null, 1)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "clicks.json"; a.click();
+};
+window.addEventListener("resize", fit);
+bg.onload = () => { fit(); update(); };
+window.CLICKTOOL = { POINTS, payload, setView, seek, toImg, get zoom() { return zoom; } };
+</script>
+</body>
+</html>

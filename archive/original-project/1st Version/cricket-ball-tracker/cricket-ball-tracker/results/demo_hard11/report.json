@@ -1,0 +1,49 @@
+{
+  "status": "NO DECISION: projection to the stumps failed",
+  "bounce_xy_m": [
+    0.385,
+    2.076
+  ],
+  "bounce_sigma_m": [
+    0.014,
+    0.032
+  ],
+  "impact_xyz_m": [
+    0.216,
+    1.731,
+    0.428
+  ],
+  "stumps_xz_m": [
+    NaN,
+    NaN
+  ],
+  "stumps_sigma_m": [
+    5.319,
+    4.795
+  ],
+  "release_speed_kmh": 127.3,
+  "pitching": "outside off",
+  "impact": "outside off",
+  "wickets": "missing",
+  "wickets_confidence": {
+    "hitting": 0.0,
+    "umpires call": 0.0,
+    "missing": 1.0
+  },
+  "rms_px": 1.71,
+  "n_obs": 106,
+  "n_inliers": 103,
+  "n_after_bounce": 4,
+  "truth": {
+    "bounce_xy_m": [
+      0.385,
+      2.309
+    ],
+    "stumps_xz_m": [
+      0.443,
+      0.249
+    ],
+    "speed_kmh": 127.8,
+    "wickets": "missing"
+  }
+}

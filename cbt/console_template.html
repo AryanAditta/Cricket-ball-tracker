@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TV Umpire Console</title>
+<style>
+  :root {
+    --bg: #0b1218; --panel: #121c26; --panel2: #18242f; --line: rgba(255,255,255,0.10);
+    --ink: #eef2f5; --muted: #95a6b6; --accent: #1f9d55; --red: #d8232a; --green: #1f9d55;
+    --amber: #e8961a; --grey: #6b7785; --blue: #2e7bd6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif; font-size: 14px; }
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 16px; margin: 0; letter-spacing: 0.04em; }
+  header .sub { color: var(--muted); }
+  .pill { padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .pill.ok { background: rgba(31,157,85,0.2); color: #6fe3a1; }
+  .pill.bad { background: rgba(232,150,26,0.2); color: #ffc46b; }
+  main { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(360px, 1fr); gap: 12px; padding: 12px; height: calc(100% - 50px); }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; min-height: 0; }
+  .left { display: flex; flex-direction: column; gap: 10px; padding: 10px; }
+  .cams { display: grid; gap: 8px; flex: none; }
+  .cam { position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16 / 9; }
+  .cam video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .cam .lab { position: absolute; left: 8px; top: 8px; background: rgba(0,0,0,0.65); padding: 3px 8px;
+    border-radius: 6px; font-size: 12px; font-weight: 700; }
+  .cam .off { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    color: var(--muted); background: rgba(0,0,0,0.55); font-size: 13px; }
+  .transport { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  button { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 7px;
+    padding: 6px 10px; font: inherit; cursor: pointer; }
+  button:hover { border-color: rgba(255,255,255,0.3); }
+  button.on { background: var(--accent); border-color: var(--accent); }
+  .readout { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .scrub { position: relative; height: 34px; }
+  .scrub input { width: 100%; margin: 0; position: absolute; top: 4px; accent-color: var(--blue); }
+  .mark { position: absolute; top: 20px; transform: translateX(-50%); font-size: 11px; color: var(--muted);
+    white-space: nowrap; cursor: pointer; }
+  .mark::before { content: ""; position: absolute; left: 50%; top: -10px; width: 2px; height: 8px; background: currentColor; }
+  .right { display: flex; flex-direction: column; gap: 10px; padding: 10px; overflow: auto; }
+  .replay { position: relative; width: 100%; flex: 1; min-height: 280px; border-radius: 8px; overflow: hidden; background: #000; }
+  .replay iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 4px 0 6px; }
+  .inputs { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; }
+  .seg { display: flex; gap: 4px; flex-wrap: wrap; }
+  .steps { display: flex; flex-direction: column; gap: 6px; }
+  .step { display: grid; grid-template-columns: 22px 92px 1fr; gap: 8px; align-items: center; background: var(--panel2);
+    border-radius: 8px; padding: 8px 10px; border-left: 4px solid var(--grey); }
+  .step .n { color: var(--muted); font-weight: 700; }
+  .step .k { font-weight: 700; letter-spacing: 0.04em; }
+  .step .v { font-weight: 800; }
+  .step .note { grid-column: 3; color: var(--muted); font-size: 12px; }
+  .step.red { border-left-color: var(--red); } .step.green { border-left-color: var(--green); }
+  .step.amber { border-left-color: var(--amber); } .step.skip { opacity: 0.38; }
+  .verdict { border-radius: 10px; padding: 12px 14px; text-align: center; }
+  .verdict .big { font-size: 30px; font-weight: 800; letter-spacing: 0.02em; }
+  .verdict .small { font-size: 12px; font-weight: 700; opacity: 0.92; text-transform: uppercase; }
+  .fast { background: rgba(31,157,85,0.18); border: 1px solid rgba(31,157,85,0.5); color: #9ff0c2;
+    border-radius: 8px; padding: 8px 10px; font-weight: 700; display: none; }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  .quality { color: var(--muted); font-size: 12px; line-height: 1.5; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; height: auto; } .cams { min-height: 50vh; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>TV UMPIRE CONSOLE · LBW REVIEW</h1>
+  <span class="sub" id="source"></span>
+  <span class="pill" id="status"></span>
+</header>
+<main>
+  <section class="left">
+    <div class="cams" id="cams"></div>
+    <div class="scrub" id="scrub"><input type="range" id="slider" min="0" max="1" step="0.0001" value="0"></div>
+    <div class="transport">
+      <button id="toRel" title="Home">⏮ Release</button>
+      <button id="back" title="← one frame">◀ Frame</button>
+      <button id="play" title="Space">▶ Play</button>
+      <button id="fwd" title="→ one frame">Frame ▶</button>
+      <button id="toImp" title="End">Impact ⏭</button>
+      <span style="width:8px"></span>
+      <button data-speed="1">1×</button><button data-speed="0.25" class="on">¼×</button><button data-speed="0.1">⅒×</button>
+      <span class="readout" id="readout"></span>
+    </div>
+    <div class="replay"><iframe id="replay" title="Ball-tracking replay"></iframe></div>
+  </section>
+  <section class="right">
+    <div>
+      <h2>Review</h2>
+      <div class="inputs">
+        <span>Reviewed by</span><div class="seg" id="by"><button data-v="batting">Batting side</button><button data-v="fielding">Fielding side</button></div>
+        <span>On-field decision</span><div class="seg" id="onfield"><button data-v="out">Out</button><button data-v="not out">Not out</button></div>
+        <span>Shot offered</span><div class="seg" id="shot"><button data-v="1">Yes</button><button data-v="0">No</button></div>
+      </div>
+    </div>
+    <div class="fast" id="fast"></div>
+    <div>
+      <h2>Protocol</h2>
+      <div class="steps" id="steps"></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <div class="actions">
+      <button id="toReplay">Show on replay</button>
+      <button id="log">Log decision</button>
+      <button id="export">Export log (CSV)</button>
+      <button id="clear">Clear log</button>
+    </div>
+    <div class="quality" id="quality"></div>
+    <div>
+      <h2>Review log</h2>
+      <table><thead><tr><th>Time</th><th>Delivery</th><th>By</th><th>On-field</th><th>P / I / W</th><th>Decision</th><th>Review</th></tr></thead>
+      <tbody id="logbody"></tbody></table>
+    </div>
+  </section>
+</main>
+<script type="application/json" id="data">__DATA__</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("data").textContent);
+const rep = D.report;
+const $ = (id) => document.getElementById(id);
+const LABELS = { end_bowler: "Behind the bowler", end_striker: "Behind the striker",
+                 side_off: "Square · off side", side_leg: "Square · leg side" };
+
+// ---------------------------------------------------------------- LBW protocol (mirrors cbt/lbw.py)
+function decide(p, i, w, onField, shot, drule) {
+  const r = (d, uc, why) => ({ decision: d, umpiresCall: uc, reason: why });
+  if (p === "outside leg") return r("not out", false, "pitched outside leg");
+  if (i === "outside leg") return r("not out", false, "impact outside leg");
+  if (i === "outside off" && shot) return r("not out", false, "impact outside off, shot offered");
+  if (w === "missing") return r("not out", false, "missing the stumps");
+  if (w === "inconclusive") return r(onField, true, "insufficient tracking data");
+  if (i === "umpires call") return r(onField, true, "umpire's call on impact");
+  if (w === "umpires call") return r(onField, true, "umpire's call on wickets");
+  if (drule) return r(onField, true, `${drule} rule`);
+  return r("out", false, "LBW");
+}
+function reviewOutcome(onField, final, uc, by) {
+  if (uc) return "umpire's call (review retained)";
+  const wanted = by === "batting" ? "not out" : "out";
+  return final === wanted ? "successful" : "unsuccessful (review lost)";
+}
+const state = { by: "fielding", onField: rep.on_field || "not out", shot: rep.shot_offered !== false };
+if (state.onField === "out") state.by = "batting";
+const pretty = (v) => (v || "").toUpperCase().replace("UMPIRES", "UMPIRE'S");
+function colour(field, v) {
+  if (v === "inconclusive") return "grey";
+  if (v === "umpires call") return "amber";
+  if (field === "pitching") return v === "outside leg" ? "green" : "red";
+  if (field === "impact") return v === "in line" ? "red" : "green";
+  return v === "hitting" ? "red" : "green";
+}
+function renderReview() {
+  const d = decide(rep.pitching, rep.impact, rep.wickets, state.onField, state.shot, rep.distance_rule);
+  const steps = [];
+  let stopped = false;
+  const add = (k, v, col, note) => steps.push({ k, v, col: stopped ? "skip" : col, note });
+  // 1 pitching
+  add("PITCHING", pretty(rep.pitching), colour("pitching", rep.pitching),
+      rep.pitching === "outside leg" ? "Pitched outside leg: NOT OUT. Stop here." :
+      `bounce ${rep.bounce_xy_m[1].toFixed(2)} m from the stumps`);
+  const fast = $("fast");
+  if (rep.pitching === "outside leg") {
+    stopped = true;
+    fast.style.display = "block";
+    fast.textContent = "Fast path: the ball pitched outside leg. Tell the TV umpire NOT OUT now; no further checks needed.";
+  } else fast.style.display = "none";
+  // 2 impact
+  let impNote = rep.impact === "umpires call" ? "1–50% of the ball in line: on-field decision stands" :
+    rep.impact === "outside leg" ? "NOT OUT" :
+    rep.impact === "outside off" ? (state.shot ? "Shot offered: NOT OUT" : "No shot offered: treat as in line") :
+    "50% or more of the ball in line";
+  add("IMPACT", pretty(rep.impact), colour("impact", rep.impact), impNote);
+  if (!stopped && (rep.impact === "outside leg" || (rep.impact === "outside off" && state.shot))) stopped = true;
+  // 3 wickets
+  const c = rep.wickets_confidence || {};
+  add("WICKETS", pretty(rep.wickets), colour("wickets", rep.wickets),
+      `hitting ${(100 * (c.hitting || 0)).toFixed(0)}% · umpire's call ${(100 * (c["umpires call"] || 0)).toFixed(0)}% · missing ${(100 * (c.missing || 0)).toFixed(0)}% · ±${(200 * rep.stumps_sigma_m[0]).toFixed(1)} cm`);
+  if (!stopped && rep.wickets === "missing") stopped = true;
+  // 4 distance
+  add("DISTANCE", rep.distance_rule ? `${rep.distance_rule.toUpperCase()} RULE` : "NO RULE",
+      rep.distance_rule ? "amber" : "grey",
+      `impact → stumps ${rep.impact_to_stumps_m.toFixed(2)} m · pitch → impact ${rep.pitch_to_impact_m.toFixed(2)} m`);
+  $("steps").innerHTML = steps.map((s, k) => `
+    <div class="step ${s.col}"><span class="n">${k + 1}</span><span class="k">${s.k}</span><span class="v">${s.v}</span>
+    <span class="note">${s.note}</span></div>`).join("");
+  // verdict
+  const word = d.decision.toUpperCase();
+  const outcome = reviewOutcome(state.onField, d.decision, d.umpiresCall, state.by);
+  const col = rep.wickets === "inconclusive" ? "grey" : d.umpiresCall ? "amber" : d.decision === "out" ? "red" : "green";
+  const v = $("verdict");
+  v.style.background = `var(--${col})`;
+  v.innerHTML = `<div class="big">${d.umpiresCall ? (rep.wickets === "inconclusive" ? "NO DECISION" : "UMPIRE'S CALL") : word}</div>
+    <div class="small">${d.umpiresCall ? word + " · on-field decision stands · " : ""}${d.reason}</div>
+    <div class="small" style="margin-top:4px">review: ${outcome}</div>`;
+  state.final = d; state.outcome = outcome;
+  for (const [id, key] of [["by", "by"], ["onfield", "onField"], ["shot", "shot"]])
+    $(id).querySelectorAll("button").forEach((b) => b.classList.toggle("on",
+      key === "shot" ? (b.dataset.v === "1") === state.shot : b.dataset.v === state[key]));
+}
+for (const [id, key] of [["by", "by"], ["onfield", "onField"], ["shot", "shot"]])
+  $(id).querySelectorAll("button").forEach((b) => b.onclick = () => {
+    state[key] = key === "shot" ? b.dataset.v === "1" : b.dataset.v;
+    // only the side that lost the on-field decision can review it
+    if (key === "onField") state.by = state.onField === "out" ? "batting" : "fielding";
+    if (key === "by") state.onField = state.by === "batting" ? "out" : "not out";
+    renderReview(); });
+
+function showReplay() {
+  $("replay").src = `${D.replay}?embed=1&onfield=${encodeURIComponent(state.onField)}&shot=${state.shot ? 1 : 0}`;
+}
+$("toReplay").onclick = showReplay;
+
+// ---------------------------------------------------------------- review log (this browser only; export to keep)
+const LOGKEY = "cbt-review-log";
+function loadLog() { try { return JSON.parse(localStorage.getItem(LOGKEY) || "[]"); } catch (e) { return []; } }
+function saveLog(l) { try { localStorage.setItem(LOGKEY, JSON.stringify(l)); } catch (e) { /* storage blocked */ } }
+let LOG = loadLog();
+function renderLog() {
+  $("logbody").innerHTML = LOG.slice().reverse().map((r) => `<tr><td>${r.time}</td><td>${r.delivery}</td>
+    <td>${r.by}</td><td>${r.on_field}</td><td>${r.pitching} / ${r.impact} / ${r.wickets}</td>
+    <td>${r.decision}${r.umpires_call ? " (UC)" : ""}</td><td>${r.review}</td></tr>`).join("") ||
+    `<tr><td colspan="7" style="color:var(--muted)">No decisions logged yet.</td></tr>`;
+}
+$("log").onclick = () => {
+  LOG.push({ time: new Date().toLocaleString(), delivery: D.delivery, by: state.by, on_field: state.onField,
+             shot_offered: state.shot, pitching: rep.pitching, impact: rep.impact, wickets: rep.wickets,
+             distance_rule: rep.distance_rule || "", decision: state.final.decision,
+             umpires_call: state.final.umpiresCall, reason: state.final.reason, review: state.outcome,
+             speed_kmh: rep.release_speed_kmh ?? rep.speed_estimate_kmh ?? "" });
+  saveLog(LOG); renderLog();
+};
+$("clear").onclick = () => { if (confirm("Clear the review log in this browser?")) { LOG = []; saveLog(LOG); renderLog(); } };
+$("export").onclick = () => {
+  if (!LOG.length) return;
+  const cols = Object.keys(LOG[0]);
+  const csv = [cols.join(",")].concat(LOG.map((r) => cols.map((k) => `"${String(r[k]).replace(/"/g, '""')}"`).join(","))).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = "review-log.csv"; a.click();
+};
+
+// ---------------------------------------------------------------- synced camera views
+const cams = $("cams");
+cams.style.gridTemplateColumns = D.videos.length > 1 ? "1fr 1fr" : "1fr";
+const V = D.videos.map((m) => {
+  const box = document.createElement("div"); box.className = "cam";
+  const v = document.createElement("video");
+  v.src = m.src; v.muted = true; v.playsInline = true; v.preload = "auto";
+  const lab = document.createElement("div"); lab.className = "lab"; lab.textContent = LABELS[m.name] || m.name;
+  const off = document.createElement("div"); off.className = "off"; off.textContent = "no footage at this time";
+  box.append(v, lab, off); cams.append(box);
+  return { m, v, off };
+});
+const FPS = D.videos.length ? D.videos[0].fps : 120;
+let T = D.times.release, Tmin = Infinity, Tmax = -Infinity, playing = false, speed = 0.25, last = 0;
+function range() {
+  Tmin = Infinity; Tmax = -Infinity;
+  for (const c of V) {
+    const dur = isFinite(c.v.duration) ? c.v.duration : 0;
+    Tmin = Math.min(Tmin, c.m.t0); Tmax = Math.max(Tmax, c.m.t0 + dur * c.m.rate);
+  }
+  if (!isFinite(Tmin)) { Tmin = D.times.release - 0.2; Tmax = D.times.impact + 0.2; }
+  const s = $("slider"); s.min = Tmin; s.max = Tmax;
+  // event markers on the scrubber
+  document.querySelectorAll(".mark").forEach((e) => e.remove());
+  let prevX = -1, row = 0;
+  for (const [k, lab] of [["release", "release"], ["bounce", "bounce"], ["impact", "impact"]]) {
+    const e = document.createElement("span"); e.className = "mark"; e.textContent = lab;
+    const x = 100 * (D.times[k] - Tmin) / (Tmax - Tmin);
+    row = (x - prevX < 8) ? 1 - row : 0; prevX = x;       // stagger labels that would overlap
+    e.style.left = `${x}%`; if (row) e.style.top = "34px";
+    e.style.color = k === "impact" ? "var(--amber)" : k === "bounce" ? "#fff" : "var(--muted)";
+    e.onclick = () => { pause(); setT(D.times[k]); };
+    $("scrub").append(e);
+  }
+}
+function setT(t) {
+  T = Math.max(Tmin, Math.min(Tmax, t));
+  for (const c of V) {
+    const tau = (T - c.m.t0) / c.m.rate;
+    const dur = isFinite(c.v.duration) ? c.v.duration : 0;
+    const inside = tau >= 0 && tau <= dur;
+    c.off.style.display = inside ? "none" : "flex";
+    const target = Math.max(0, Math.min(dur - 0.001, tau));
+    if (Math.abs(c.v.currentTime - target) > 0.0005) c.v.currentTime = target;
+  }
+  $("slider").value = T;
+  const frame = Math.round((T - D.times.release) * FPS);
+  $("readout").textContent = `T ${T >= 0 ? "+" : ""}${T.toFixed(3)} s · frame ${frame >= 0 ? "+" : ""}${frame} from release`;
+}
+function tick(now) {
+  if (!playing) return;
+  const dt = last ? (now - last) / 1000 : 0; last = now;
+  setT(T + dt * speed);
+  if (T >= Tmax) { pause(); return; }
+  requestAnimationFrame(tick);
+}
+function play() { if (T >= Tmax - 1e-3) setT(Tmin); playing = true; last = 0; $("play").textContent = "⏸ Pause"; requestAnimationFrame(tick); }
+function pause() { playing = false; $("play").textContent = "▶ Play"; }
+$("play").onclick = () => (playing ? pause() : play());
+$("back").onclick = () => { pause(); setT(T - 1 / FPS); };
+$("fwd").onclick = () => { pause(); setT(T + 1 / FPS); };
+$("toRel").onclick = () => { pause(); setT(D.times.release); };
+$("toImp").onclick = () => { pause(); setT(D.times.impact); };
+$("slider").oninput = (e) => { pause(); setT(+e.target.value); };
+document.querySelectorAll("[data-speed]").forEach((b) => b.onclick = () => {
+  speed = +b.dataset.speed;
+  document.querySelectorAll("[data-speed]").forEach((x) => x.classList.toggle("on", x === b));
+});
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT" && e.key !== " ") return;
+  if (e.key === " ") { e.preventDefault(); playing ? pause() : play(); }
+  else if (e.key === "ArrowLeft") { pause(); setT(T - 1 / FPS); }
+  else if (e.key === "ArrowRight") { pause(); setT(T + 1 / FPS); }
+  else if (e.key === "Home") { pause(); setT(D.times.release); }
+  else if (e.key === "End") { pause(); setT(D.times.impact); }
+});
+let loaded = 0;
+V.forEach((c) => c.v.addEventListener("loadedmetadata", () => { if (++loaded === V.length) { range(); setT(D.times.release); } }));
+
+// ---------------------------------------------------------------- header
+$("source").textContent = `${D.delivery} · ${D.meta.source}`;
+const st = $("status");
+st.textContent = rep.status === "ok" ? "TRACKING OK" : rep.status;
+st.className = "pill " + (rep.status === "ok" ? "ok" : "bad");
+const spdTxt = rep.release_speed_kmh != null ? `Release speed <b>${rep.release_speed_kmh.toFixed(1)} km/h</b>`
+  : rep.speed_estimate_kmh != null ? `Speed (estimate) <b>≈${rep.speed_estimate_kmh.toFixed(0)} ± ${(rep.speed_sigma_kmh || 0).toFixed(0)} km/h</b>`
+  : "Speed <b>—</b>";
+$("quality").innerHTML = `${spdTxt} · ${rep.method ? rep.method + " · " : ""}${rep.n_inliers}/${rep.n_obs} detections used ·
+  ${rep.n_after_bounce !== undefined ? rep.n_after_bounce + " after the bounce · " : ""}reprojection rms ${rep.rms_px} px ·
+  bounce ±${(200 * rep.bounce_sigma_m[1]).toFixed(1)} cm (2σ)`;
+renderReview(); renderLog(); showReplay(); range(); setT(D.times.release);
+window.CONSOLE = { decide, setT, state };
+</script>
+</body>
+</html>

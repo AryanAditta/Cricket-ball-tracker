@@ -1,0 +1,49 @@
+{
+  "status": "NO DECISION: only 1 detections after the bounce",
+  "bounce_xy_m": [
+    0.323,
+    1.497
+  ],
+  "bounce_sigma_m": [
+    0.01,
+    0.088
+  ],
+  "impact_xyz_m": [
+    0.322,
+    1.394,
+    0.044
+  ],
+  "stumps_xz_m": [
+    0.304,
+    0.143
+  ],
+  "stumps_sigma_m": [
+    0.33,
+    0.178
+  ],
+  "release_speed_kmh": 152.1,
+  "pitching": "outside off",
+  "impact": "outside off",
+  "wickets": "missing",
+  "wickets_confidence": {
+    "hitting": 0.117,
+    "umpires call": 0.083,
+    "missing": 0.8
+  },
+  "rms_px": 3.84,
+  "n_obs": 107,
+  "n_inliers": 90,
+  "n_after_bounce": 1,
+  "truth": {
+    "bounce_xy_m": [
+      0.336,
+      1.846
+    ],
+    "stumps_xz_m": [
+      0.335,
+      0.193
+    ],
+    "speed_kmh": 143.5,
+    "wickets": "missing"
+  }
+}

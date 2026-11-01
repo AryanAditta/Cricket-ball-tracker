@@ -1,0 +1,1095 @@
+{
+  "source_folder": "Rahul's Project",
+  "files": [
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/__main__.py",
+      "bytes": 29,
+      "sha256": "cf7390a2508a0fcad4777a4a629fc5212ab655cb45845975995f835676a834e3"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/annotate.py",
+      "bytes": 3054,
+      "sha256": "aa0531f92a6afceaf5931a34623117f9d54b9baabfe682431220006bd46148c1"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/camera.py",
+      "bytes": 5766,
+      "sha256": "3a468b884e81b6238017b6be5b8005c1ad697888fd5cb94dbf3df2b658e58ff3"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/cli.py",
+      "bytes": 15220,
+      "sha256": "4ea64c021ea4957a3a2af22e64b32a759c8628dcd07df728a9454c473f9ec9e7"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/detect.py",
+      "bytes": 5002,
+      "sha256": "dc3eda337b52cd80606b790f6859c7088c4490cded272ca201b17eb809134c63"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/fit.py",
+      "bytes": 10488,
+      "sha256": "f15f7bd37f72387fe1a354df2c227f4d8f3572fb1328460743a05eaa4a66a6f8"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/lbw.py",
+      "bytes": 1637,
+      "sha256": "2109af6f8a8687e988dd838311ebefd6c97a6e9957f963a406a1e03c340f75bf"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/pitch.py",
+      "bytes": 1836,
+      "sha256": "afeede0cc757abf258cf2daf8cd3546d22800bdb70bbc1f8f3bfc01b5c7ad843"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/rigs.py",
+      "bytes": 1518,
+      "sha256": "0d8890ffdf259fb22046c020ec0bc766a53ff323f7e32beb86beaf33f5174e5e"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/sim.py",
+      "bytes": 6780,
+      "sha256": "6ecf8073332f6bdeaf9d18d9d11a50e144ba1394de9bf30cb5d99963a61e55af"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/synthvideo.py",
+      "bytes": 6305,
+      "sha256": "b68e21344609c65ab0c4827d45ed712978291f419d60e44755ce9d729ab4a12f"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/track2d.py",
+      "bytes": 5751,
+      "sha256": "a257d491214a2e142b67ef5555d8105fa186eed47cf625a9a740fce7882c1261"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/cbt/viz.py",
+      "bytes": 4985,
+      "sha256": "a0981e77faad28edea221b8eb84b8af693ef069bd6a6b19c427faacc9cb6c1c8"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/README.md",
+      "bytes": 9002,
+      "sha256": "1471c1681bf86265511328239b369655ee1213c9f604f32d794e663dcbe2059f"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/requirements.txt",
+      "bytes": 95,
+      "sha256": "8f070e6b9dfbf0778664238a8ee6910fa92cd1a6e37cf0f784e76eaa9c02ed23"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo/delivery.png",
+      "bytes": 119340,
+      "sha256": "18732d5eae3ff29a18d72639aa727f7c941d82677f3b133177c42f071a688276"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo/end_bowler.mp4",
+      "bytes": 5698667,
+      "sha256": "8c92b722c2919353788433fbd3c2031373a5d0ee6f0ab84af523ef744235172e"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo/end_bowler_tracked.mp4",
+      "bytes": 1640832,
+      "sha256": "de261dae3051503d09eb5555365ac9aaa2658addcd66419293936743049c4950"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo/report.json",
+      "bytes": 756,
+      "sha256": "a9579320dfcec1edd9fa57c9d89b16c76fd1624528a2c6d6fab327934faeac8a"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo/side_off.mp4",
+      "bytes": 5673120,
+      "sha256": "9c8a7412510740fc5babd37ecd5d6b82a73a4a0fd123fb6c60984d5905798481"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo/side_off_tracked.mp4",
+      "bytes": 1638411,
+      "sha256": "4851c68e46261c9ec8cb88db0bd787a3a477538f10772a1a95bf8eddc87aeaa2"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard/delivery.png",
+      "bytes": 162291,
+      "sha256": "36137de45757f34b6f384acbb2b4cc82a695e785d8298cacf2678d2248eff058"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard/report.json",
+      "bytes": 668,
+      "sha256": "619e5b7cb4937c50de0ef03d1b6c901cd2844ea543d2e98767365a874155050b"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard11/delivery.png",
+      "bytes": 163502,
+      "sha256": "ab1bded1ad064cd862942d5c18c59ecadfea4cc92e4803b3bfe50cd4c11bcec0"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard11/report.json",
+      "bytes": 756,
+      "sha256": "66a5ab8b714c264d2833477ac60a24088ad02c9f2031f9fdbd7e3890f1a4662f"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard4/delivery.png",
+      "bytes": 162759,
+      "sha256": "6a9d461f6d88fa79eed1e3a08dbf75df68ec1ae853534dc879a65844e36c349f"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard4/report.json",
+      "bytes": 669,
+      "sha256": "d9ddaf7ecac585fe39d47a6c264058ac3ff95d057ec5b817b210359e4ae8f289"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard7/delivery.png",
+      "bytes": 174850,
+      "sha256": "b22bc145657982d0aa0e3e94222fd9e53d44b16ade0deecb725f5fde4e8a286c"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/demo_hard7/report.json",
+      "bytes": 764,
+      "sha256": "9ebd46148c8ff304f214b414e027590f659cf6427e6e4734f343cfae8b5bdb18"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/study_fps.csv",
+      "bytes": 717,
+      "sha256": "db731253ef3a22d93849878beea82b54798e387aa520449edf29db2ba0efd610"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/study_noise.csv",
+      "bytes": 525,
+      "sha256": "f4579cfdccdbd148b7b06433fe12091f3d16d637eeac12d676473b34308083cb"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/study_rigs.csv",
+      "bytes": 1094,
+      "sha256": "4022f60da6bc2c24fee13580ac7659a540649557dd8a2fcc7dc854b4c279d6ad"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_A/delivery.png",
+      "bytes": 159980,
+      "sha256": "c17f11476d9cd28951834d09eb44389a90b277580520eab63ab93188d850c6a5"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_A/report.json",
+      "bytes": 714,
+      "sha256": "50e35eed50026a53db2f9192ddb52127dd931c147884583ab61cbad0c2f3ac04"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_B/delivery.png",
+      "bytes": 174843,
+      "sha256": "9ab0b29271c70e31916236259a3998a1ad307eb9ed739cfe0e80f286caa52379"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_B/report.json",
+      "bytes": 763,
+      "sha256": "5d91f765ddd5c3a096d8d0d6cc5d92d485020412033513e9bb87e8515a732ded"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_C/delivery.png",
+      "bytes": 179903,
+      "sha256": "2cfa7e7d347c4ee14a870c43308c6f9e90854b0aacc0a1d0afa3fcd2ba9d744b"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_C/report.json",
+      "bytes": 768,
+      "sha256": "8d473f9002118d4cd598aba9b1b61bb18e9c0ea36c3fb5ce372f5d3bef074480"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_D/delivery.png",
+      "bytes": 180309,
+      "sha256": "09c588ae66be2d2a129618e7388c5f690ea93ffa420fb47826040e7b982ee4e2"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/try_D/report.json",
+      "bytes": 776,
+      "sha256": "25ea575680c121fba1442666d53132abacc8b5babf048f1b9e6c888073e0f864"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/videostudy_clean.csv",
+      "bytes": 3252,
+      "sha256": "4fd9067b25b9c4ad24009d7967dddb12769ecb0ea6ca37b562eb808e2a49db6d"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/results/videostudy_hard.csv",
+      "bytes": 3212,
+      "sha256": "6ef6e0ea6e250efd7d2a0f4f51e818424c2b4451fe44bacbc2b64bfb04e33b6f"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_core.py",
+      "bytes": 1702,
+      "sha256": "646b35502ecb8f4bbeb13ced1d5825b2aaea4226f07a9f60caacf7f7602f6d2d"
+    },
+    {
+      "path": "1st Version/cricket-ball-tracker.zip",
+      "bytes": 1470788,
+      "sha256": "9c1c530623b272462beb7ece22403ae29dcdf412c95406ebb57c1e0f664506e2"
+    },
+    {
+      "path": "1st Version/inswinger_result.png",
+      "bytes": 159980,
+      "sha256": "c17f11476d9cd28951834d09eb44389a90b277580520eab63ab93188d850c6a5"
+    },
+    {
+      "path": "1st Version/inswinger_tracked.mp4",
+      "bytes": 492718,
+      "sha256": "04acf8ad36d75d47f23294da7774dbfb0ddab77c5f387aa8cc7c9b69d920e6da"
+    },
+    {
+      "path": "1st Version/legspinner_hard_result.png",
+      "bytes": 174843,
+      "sha256": "9ab0b29271c70e31916236259a3998a1ad307eb9ed739cfe0e80f286caa52379"
+    },
+    {
+      "path": "1st Version/legspinner_hard_tracked.mp4",
+      "bytes": 2076227,
+      "sha256": "c4f8e4ace8b5ac227990d8bdb6084957619224f37a0843f769048bd2b050e82c"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/1_OUT_plumb_LBW/console.html",
+      "bytes": 20823,
+      "sha256": "e03833fa2585b602df90c9a01270f2f6d053ec1a800c310e59704e4e795f95fe"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/1_OUT_plumb_LBW/console_media/end_bowler.webm",
+      "bytes": 2219267,
+      "sha256": "d32952dc1169245f2ca7156835e0622a88ac346992f653b05504cd935683ad1f"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/1_OUT_plumb_LBW/console_media/side_off.webm",
+      "bytes": 2193588,
+      "sha256": "3cd2dae77e62460d2593801b03f2269dbae830175723ff6983ccec314a1fdd64"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/1_OUT_plumb_LBW/replay.html",
+      "bytes": 693638,
+      "sha256": "5f3064afd415147857cafd63c8faa6a41e9bef713e0808fcc2b07c8a95ea9894"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/1_OUT_plumb_LBW/replay.mp4",
+      "bytes": 3510271,
+      "sha256": "8c2938d7468bbdf579329a79492f4460f8559534dddcedc768f59c59d20db805"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/2_NOT_OUT_legspin_missing_off/console.html",
+      "bytes": 20859,
+      "sha256": "3500ee539fbd24e8b9d8ec5d69f6e821dd4e83941b010a4946645ac65ec5f282"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/2_NOT_OUT_legspin_missing_off/console_media/end_bowler.webm",
+      "bytes": 2905665,
+      "sha256": "a7f222e56c73354530be4dbdec3ccbac2868f4d2c8a29bc704aa2d6e3d46ddf5"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/2_NOT_OUT_legspin_missing_off/console_media/side_off.webm",
+      "bytes": 2876304,
+      "sha256": "5873b78f4631e1c0e67aa7b64e41d6bdad4d08e8be11e10ea35776f9f68836c4"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/2_NOT_OUT_legspin_missing_off/replay.html",
+      "bytes": 705232,
+      "sha256": "21ae8ea1f2533ffe77f36a946fc91d5191ac9b635b4961d9604dd796a2b0cceb"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/2_NOT_OUT_legspin_missing_off/replay.mp4",
+      "bytes": 3889764,
+      "sha256": "5b2ad56ceb317a7da6b0e5b5d8606d19e897ab38fd336919929cfa7bfd9264f7"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/3_NOT_OUT_pitched_outside_leg/console.html",
+      "bytes": 20872,
+      "sha256": "d869ad0d4adb45d8fbb143f741e23298b5dc7a6b99583e118de1b61b867589ef"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/3_NOT_OUT_pitched_outside_leg/console_media/end_bowler.webm",
+      "bytes": 2909573,
+      "sha256": "24ab96a299a79ed96423638286f2237c2f5766b76bf322eee6302f01085bd5a2"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/3_NOT_OUT_pitched_outside_leg/console_media/side_off.webm",
+      "bytes": 2879694,
+      "sha256": "bcc63b40e43fea2a26a165c43f4f1b06937ff0e4b89cec25356d615fb78bd08d"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/3_NOT_OUT_pitched_outside_leg/replay.html",
+      "bytes": 705523,
+      "sha256": "eab8c5445c0f756853ce1b729628163f7cd3ba4b94f0d8ed3ead0878b25b90c6"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/3_NOT_OUT_pitched_outside_leg/replay.mp4",
+      "bytes": 3925468,
+      "sha256": "575564215fab6138d66543a6f617075497ff5926f265a7625674dc74cfe87c73"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/4_UMPIRES_CALL_clipping_off/console.html",
+      "bytes": 20856,
+      "sha256": "b5f6a612191b18cf2a15c5ffad5d05dd002af1c0841ccc9dbe4fabbe2448156d"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/4_UMPIRES_CALL_clipping_off/console_media/end_bowler.webm",
+      "bytes": 2214348,
+      "sha256": "913e282a97cd90ad36505b4156862a5ee15301b7e1bf0eca74579ffa2a42c61e"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/4_UMPIRES_CALL_clipping_off/console_media/side_off.webm",
+      "bytes": 2204905,
+      "sha256": "c3abac79b7087fac8e01f18666de314209b2f3b4d40fc36db7d0abe80dff1006"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/4_UMPIRES_CALL_clipping_off/replay.html",
+      "bytes": 693667,
+      "sha256": "c562269b4847ac9c279afdcf7e1a20916e2ab29593e10298bae0e9bda051291e"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/4_UMPIRES_CALL_clipping_off/replay.mp4",
+      "bytes": 3528992,
+      "sha256": "2375fec40aae6043b5c0fc1d70a50831d39c4e8e1093e3beb3ad0f6179fe5c2d"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack/BCB_demo_pack/README.txt",
+      "bytes": 1341,
+      "sha256": "fefb79df5c685408634d2b40a2422c3302a1eb16c878f8dbf2c499c490eb060c"
+    },
+    {
+      "path": "2nd Version/BCB_demo_pack.zip",
+      "bytes": 35990249,
+      "sha256": "8d0e2c66046aac71ecaf38a2e8e07c4391cac784ae88881526a8ef844757f94a"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/__main__.py",
+      "bytes": 29,
+      "sha256": "cf7390a2508a0fcad4777a4a629fc5212ab655cb45845975995f835676a834e3"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/annotate.py",
+      "bytes": 2942,
+      "sha256": "19d817362a124e37238a9730592ec0533d6c24037c6f7f1602820a75946fa282"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/camera.py",
+      "bytes": 5766,
+      "sha256": "3a468b884e81b6238017b6be5b8005c1ad697888fd5cb94dbf3df2b658e58ff3"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/cli.py",
+      "bytes": 22475,
+      "sha256": "25197ff63ecb07ea740175a1cbff560dc9113f30d6ba0ce01a2e9724a0572827"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/console.py",
+      "bytes": 2060,
+      "sha256": "26170cf1ca220fdd1faabb7c91216e4d76d8d8cd14f09e8cdc204f0f95a74afd"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/console_template.html",
+      "bytes": 19686,
+      "sha256": "68b59162604a76324642c2f451c91a1603994096716dec5373dcdb3f401bdd32"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/detect.py",
+      "bytes": 5002,
+      "sha256": "dc3eda337b52cd80606b790f6859c7088c4490cded272ca201b17eb809134c63"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/fit.py",
+      "bytes": 11154,
+      "sha256": "6fe7e8124aa3acf207be1c8b47aab62a8883ceca6cee9c8405d3d84de43e45bf"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/lbw.py",
+      "bytes": 4824,
+      "sha256": "9f71791c1197a347203235667ede46d4633d5d93960c2273b4841ae4230dff07"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/media.py",
+      "bytes": 1633,
+      "sha256": "e7009961f6762201694dfeb7baa687e8922d1572accf07f1683e8758a2750dca"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/pitch.py",
+      "bytes": 1836,
+      "sha256": "afeede0cc757abf258cf2daf8cd3546d22800bdb70bbc1f8f3bfc01b5c7ad843"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/replay.py",
+      "bytes": 4740,
+      "sha256": "d1e2af5511c6002ea1a9d4451e4971ac4fe3b8d7a43248ab08350cac959670b7"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/replay_template.html",
+      "bytes": 39347,
+      "sha256": "0181c621ee1e734b49cbc96382b5ee797a489bbd35523471da54f8dc88f12f49"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/rigs.py",
+      "bytes": 1518,
+      "sha256": "0d8890ffdf259fb22046c020ec0bc766a53ff323f7e32beb86beaf33f5174e5e"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/sim.py",
+      "bytes": 6780,
+      "sha256": "6ecf8073332f6bdeaf9d18d9d11a50e144ba1394de9bf30cb5d99963a61e55af"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/synthvideo.py",
+      "bytes": 6880,
+      "sha256": "f9534c27c0d04d20a6721f9bc20874ee9ac1c8fda149b1b87497955abe54fde7"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/track2d.py",
+      "bytes": 5751,
+      "sha256": "a257d491214a2e142b67ef5555d8105fa186eed47cf625a9a740fce7882c1261"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/validate.py",
+      "bytes": 11140,
+      "sha256": "9e16312b18d98a1ee871b88f743e39e9f7a0e1edbeb5e426e217213a9d04da41"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/OrbitControls.js",
+      "bytes": 26660,
+      "sha256": "b4c6e53f98538535b11fd6655627d47fb5877b3ad972568bff0a7026c4b6d5c4"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/three.min.js",
+      "bytes": 607784,
+      "sha256": "f34446bf875b5fb0dcd93819ffe1d9e182d46634ee855f5d904c6c4ac7cdbc95"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/THREE_LICENSE.txt",
+      "bytes": 1081,
+      "sha256": "fbf3943930dacbf56aabb8dc5d816440bd16aa6f4cc78ddbdf12106ee1807832"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/viz.py",
+      "bytes": 5447,
+      "sha256": "a802c9dcbf9b24db856020c1c799f4b215b3f31eafec7f436eea3d9dfd78286e"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/README.md",
+      "bytes": 13784,
+      "sha256": "d956c419973916b6f263d2bf1d8a1812da8fe9610aed765458bf90278ff6e218"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/requirements.txt",
+      "bytes": 178,
+      "sha256": "e6912a698b10d6b9068dfc69c084dcf8394ca2b135df9a793daaeeed471a5700"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/study_fps.csv",
+      "bytes": 717,
+      "sha256": "db731253ef3a22d93849878beea82b54798e387aa520449edf29db2ba0efd610"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/study_noise.csv",
+      "bytes": 525,
+      "sha256": "f4579cfdccdbd148b7b06433fe12091f3d16d637eeac12d676473b34308083cb"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/study_rigs.csv",
+      "bytes": 1094,
+      "sha256": "4022f60da6bc2c24fee13580ac7659a540649557dd8a2fcc7dc854b4c279d6ad"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/per_delivery.csv",
+      "bytes": 2978,
+      "sha256": "49108a2264dc311bd7bfb83e627157a48fc96150cefed0579bdc39dcbdb92cf7"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d000.json",
+      "bytes": 667,
+      "sha256": "3ed1d0bec6a6f00bfe9fa4102398e99aec4886850e1b45a62b5a61e25a1be95c"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d001.json",
+      "bytes": 663,
+      "sha256": "d388c9dbe41c3afb80f364f4e9268eadae94e208bcf0fa891eb51751e24df1f8"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d002.json",
+      "bytes": 665,
+      "sha256": "b62890112d3da871499dd00351b13828d5adf14feef07d983aeb705a9e5ff932"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d003.json",
+      "bytes": 706,
+      "sha256": "074db127ae2d45dc3078961812631849e8a2074c012f60e669c4c05c02d214f4"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d004.json",
+      "bytes": 654,
+      "sha256": "85b9de3d234b21f0a9b3a71034bde08f282ad3e881548b2e7fe6de71ce3605fc"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d005.json",
+      "bytes": 648,
+      "sha256": "1cb72bfc09d7d4e43c4c53c334ca3cb4af48b9f35390eb87aea35f09c5182c79"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d006.json",
+      "bytes": 670,
+      "sha256": "2875677924b6c9030494ca83aa5acb6c6fef586f0a9b5f1ea60d6dbf02980fb2"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d007.json",
+      "bytes": 659,
+      "sha256": "90ce4831f832c6dd07447bd605fbeed876ee85222c53c02d16b7d1c6fccd406a"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d008.json",
+      "bytes": 632,
+      "sha256": "5ce352ae0d4f936e4feeb8b92ef2245874f36bb3447cb3ea2d8ec98881a2b7a6"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d009.json",
+      "bytes": 656,
+      "sha256": "bc2b19fb92f378a37e6143d0aa993991e4586a0848523f36551e3f701571d983"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d010.json",
+      "bytes": 660,
+      "sha256": "ec8c67112f9073f6c5e72a94191fd7109be74c51e65d0cac41a218262661d844"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d011.json",
+      "bytes": 668,
+      "sha256": "d3928b637b66f1a494eccf975af38bf2fb977a31072f754df71e388274d15172"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d012.json",
+      "bytes": 665,
+      "sha256": "a195ae46c0c01863cdda42d3d208de0121e2a845bce2cdb0c86cb046bc5894b5"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d013.json",
+      "bytes": 654,
+      "sha256": "56e0de6bbab17147f90c3ae60026fa45afb6a2d5bb63c3fb3dd6860166e3a556"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d014.json",
+      "bytes": 631,
+      "sha256": "00bd18608b09d072d23afc20283de6f707ccbfd480e740b38b2f331e21a5c490"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d015.json",
+      "bytes": 707,
+      "sha256": "17b9875bf643278cde46f8ddd0ae9a3ad89840e77046c689a4e4082aa93bb105"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d016.json",
+      "bytes": 660,
+      "sha256": "1ea675bf977b50a8e8aba7cdedf55289878dc40ac75eeaf9ea22fc159930fc5e"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d017.json",
+      "bytes": 670,
+      "sha256": "90c0fb91a6c2e7e8770a01d2efdb07b44fc610bd41e52a44330bf960dd305186"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d018.json",
+      "bytes": 670,
+      "sha256": "c4f579ef37d2a1cf6371360382b18a4bc0913853cbd4bad6dffcc4bfbd58db65"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d019.json",
+      "bytes": 657,
+      "sha256": "65ecec168ccd046687ac316e7cb5b82161adec4bc10050874bba7ca8df579745"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d020.json",
+      "bytes": 658,
+      "sha256": "5baecca6c67bff1a7a18d3dfc54f9be9bac295e044d40abb05c6d1bbe218d2e7"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d021.json",
+      "bytes": 721,
+      "sha256": "564cd169776c100538b9226555a19c87ce7ec3ce098fdb585646c9491ae71e28"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d022.json",
+      "bytes": 716,
+      "sha256": "eae7f9f71961783968a49e724ad78a54ee8fa2045cf8677be93fc56f9c87bf68"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d023.json",
+      "bytes": 669,
+      "sha256": "0c04590e919d61cc6382b884beca543ebf93a9944d08b2917edcac0feec0b731"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d024.json",
+      "bytes": 635,
+      "sha256": "c4b5943fca500a5ef53ecc8be76456df14ab14b0781a02a09c3fb6b5c28beace"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d025.json",
+      "bytes": 658,
+      "sha256": "d8681d507e183e0b29a3052381d4482fc84f8e2fb2db40be4149614ac2639f1d"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d026.json",
+      "bytes": 659,
+      "sha256": "c64ccb031c65a2c578c36cdc996d4f1ccf9c20ae649e042f48f4924588d9e803"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d027.json",
+      "bytes": 660,
+      "sha256": "ea85b0de1469480004a8d818cf18affdfcd60dab65d179b74da64a29d1a4d3e9"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d028.json",
+      "bytes": 666,
+      "sha256": "8e5a85f15184a74ec1c997711ccc4fcc1d4e271f233e0fcd91ac21226925e162"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d029.json",
+      "bytes": 663,
+      "sha256": "24d29f16f9347599fd5ee376e58b45114a453053bb3a80307ae19a62c118c398"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d030.json",
+      "bytes": 660,
+      "sha256": "0f99a672e25280dde2c3d1ab7e59a9c9c7467ad98c347c3b1adb9e9be8a9b83b"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d031.json",
+      "bytes": 670,
+      "sha256": "ac7dc19c4ee0adedaedd5ae53f07aeca9529b2909f3d7e0945401616959065ef"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d032.json",
+      "bytes": 656,
+      "sha256": "093279e7f566f0d76bb362cd18dbf5b2c6c339090a145ff8cdc92a79201af4a0"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d033.json",
+      "bytes": 659,
+      "sha256": "bcdda0a5ff410da3308a68be9f29802b8f01a9f837839c61ba73bfd84162dde3"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d034.json",
+      "bytes": 653,
+      "sha256": "da3ad25db75b3f08ff9e040a29b0ff293a4c0f92df758885cbdfb224880af4f1"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d035.json",
+      "bytes": 658,
+      "sha256": "11819fdff3d17925973e4b0341d462af1878691d3db3765e70dd4d3c1e879a2a"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d036.json",
+      "bytes": 628,
+      "sha256": "5a38cfebb0172e30e54d3db17ae7da37255422a75f32d6196a3f53d360afa38e"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d037.json",
+      "bytes": 656,
+      "sha256": "fb29d01cdefd6e8ae33d6d0240560674c174c4571cef070a6f941f499eaacb4c"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d038.json",
+      "bytes": 660,
+      "sha256": "07539d8e7380583af39f9d44d90ed6f666b4bd03440891ac179d320e5f8c7564"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/reports/d039.json",
+      "bytes": 666,
+      "sha256": "1cb01f0e0ffa1a73948ec42b3354c713e0c04cdc02c0aa490d3c98b77929e7eb"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/truth.csv",
+      "bytes": 1449,
+      "sha256": "eb8504484dc40061aeb90f031e38c2e155c48e4055e5d71602cad6ba3841012c"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/validation_demo/validation.md",
+      "bytes": 1303,
+      "sha256": "7e6b24b29628ce46e00da04810072511809f8862db4388ab838562be171c20c1"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/videostudy_clean.csv",
+      "bytes": 3252,
+      "sha256": "4fd9067b25b9c4ad24009d7967dddb12769ecb0ea6ca37b562eb808e2a49db6d"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/results/videostudy_hard.csv",
+      "bytes": 3212,
+      "sha256": "6ef6e0ea6e250efd7d2a0f4f51e818424c2b4451fe44bacbc2b64bfb04e33b6f"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_core.py",
+      "bytes": 1702,
+      "sha256": "646b35502ecb8f4bbeb13ced1d5825b2aaea4226f07a9f60caacf7f7602f6d2d"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_lbw.py",
+      "bytes": 5290,
+      "sha256": "9132641bc83e0c5d9f0857c09e66f60b3dc999670a11c587f2c1a6dfbc93a397"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_validate.py",
+      "bytes": 1322,
+      "sha256": "2c2e9c6155523c9724f5ec224de1d2a8c067b2dfa67eb00bc311d43b96e4290b"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker/cricket-ball-tracker/VALIDATION.md",
+      "bytes": 5787,
+      "sha256": "9afcda30c47f41410e8d3b7aa1b7e70b1d5de2ade474b2972eecb2ee4108fd68"
+    },
+    {
+      "path": "2nd Version/cricket-ball-tracker.zip",
+      "bytes": 265731,
+      "sha256": "f3b9cba1c81f022bd44cfeba7de7101c1ff79b6bbe488a3414c0ae658724673d"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/__main__.py",
+      "bytes": 29,
+      "sha256": "cf7390a2508a0fcad4777a4a629fc5212ab655cb45845975995f835676a834e3"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/annotate.py",
+      "bytes": 2951,
+      "sha256": "15577c3abaa4396e1c1f713392570c98057f74abde9ced36894a03868a6ed794"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/broadcast.py",
+      "bytes": 26438,
+      "sha256": "d053cd84a4765f021161c7cf1617529d3bc490c7ae137c419ef3c040839d7981"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/broadcast_run.py",
+      "bytes": 7302,
+      "sha256": "94805d6a953df583dc28ae08113c1d3a94019f06e6afdb57930da92fe1ec84f9"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/camera.py",
+      "bytes": 5766,
+      "sha256": "3a468b884e81b6238017b6be5b8005c1ad697888fd5cb94dbf3df2b658e58ff3"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/cli.py",
+      "bytes": 25217,
+      "sha256": "fb783bf4bf1246933180bbda46761b198d36c3ef7033a2d051ee26b8178b33e3"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/clicktool.py",
+      "bytes": 2673,
+      "sha256": "3512f6e8b1abca6c78219d198584510f2cde6eb6dcdef972eee995748d6445a0"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/clicktool_template.html",
+      "bytes": 14363,
+      "sha256": "3ab6cc1bf52d2ec35420268cf31fb2c033f5298c9e24dbc3355418f285eb611a"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/console.py",
+      "bytes": 2223,
+      "sha256": "1aa04950454904ec361aeea8d3f740d57116706b0f207525239dcf8fbb4546bf"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/console_template.html",
+      "bytes": 20163,
+      "sha256": "eb462c8708241a1e865cb2c70cf95082a05a356912b5eddcd0b41d3da4fc6abc"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/detect.py",
+      "bytes": 5002,
+      "sha256": "dc3eda337b52cd80606b790f6859c7088c4490cded272ca201b17eb809134c63"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/fit.py",
+      "bytes": 9200,
+      "sha256": "762a6baf6ad957233cfed543e8326afaef8f6044f559220804755a5995b102ea"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/footage.py",
+      "bytes": 11275,
+      "sha256": "00aaabd60eb33340de04f9de529000d89d7eb98e913339d0f5d01b62a13c8573"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/lbw.py",
+      "bytes": 8140,
+      "sha256": "ece2adcd828e315a87ef3a146fc6a2944f80b5264f5ee0083d54c23cc1ee89b0"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/media.py",
+      "bytes": 1633,
+      "sha256": "e7009961f6762201694dfeb7baa687e8922d1572accf07f1683e8758a2750dca"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/monofit.py",
+      "bytes": 17728,
+      "sha256": "f74f5a3be00dc80b11208bf9d0d26259e6359a7ecdba97f066ad92d46e2fb98c"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/pitch.py",
+      "bytes": 1836,
+      "sha256": "afeede0cc757abf258cf2daf8cd3546d22800bdb70bbc1f8f3bfc01b5c7ad843"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/replay.py",
+      "bytes": 4740,
+      "sha256": "d1e2af5511c6002ea1a9d4451e4971ac4fe3b8d7a43248ab08350cac959670b7"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/replay_template.html",
+      "bytes": 39555,
+      "sha256": "1a04f22ea2621a3c67537e81d72a8d1d71119d7464a8c199b2ae2200b897b22e"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/rigs.py",
+      "bytes": 1518,
+      "sha256": "0d8890ffdf259fb22046c020ec0bc766a53ff323f7e32beb86beaf33f5174e5e"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/sim.py",
+      "bytes": 6780,
+      "sha256": "6ecf8073332f6bdeaf9d18d9d11a50e144ba1394de9bf30cb5d99963a61e55af"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/synthvideo.py",
+      "bytes": 6880,
+      "sha256": "f9534c27c0d04d20a6721f9bc20874ee9ac1c8fda149b1b87497955abe54fde7"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/track2d.py",
+      "bytes": 5751,
+      "sha256": "a257d491214a2e142b67ef5555d8105fa186eed47cf625a9a740fce7882c1261"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/validate.py",
+      "bytes": 11140,
+      "sha256": "9e16312b18d98a1ee871b88f743e39e9f7a0e1edbeb5e426e217213a9d04da41"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/DEJAVU_LICENSE.txt",
+      "bytes": 3859,
+      "sha256": "63d3ba759d12804c5b31a9d5940d855c1820d1f5999e6b0872eb1c7ff045fbc9"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/DejaVuSans-Bold.ttf",
+      "bytes": 708920,
+      "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/DejaVuSans.ttf",
+      "bytes": 759720,
+      "sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/OrbitControls.js",
+      "bytes": 26660,
+      "sha256": "b4c6e53f98538535b11fd6655627d47fb5877b3ad972568bff0a7026c4b6d5c4"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/three.min.js",
+      "bytes": 607784,
+      "sha256": "f34446bf875b5fb0dcd93819ffe1d9e182d46634ee855f5d904c6c4ac7cdbc95"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/vendor/THREE_LICENSE.txt",
+      "bytes": 1081,
+      "sha256": "fbf3943930dacbf56aabb8dc5d816440bd16aa6f4cc78ddbdf12106ee1807832"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/cbt/viz.py",
+      "bytes": 5703,
+      "sha256": "e16641f2c032aa462dbcf3c1219107d884f085030f14852d991be1cb562aa473"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/README.md",
+      "bytes": 17972,
+      "sha256": "caec0675fb211c59c5cb5ff2193440840f532fc8cfbf998003b807a0c7ea1df0"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/requirements.txt",
+      "bytes": 185,
+      "sha256": "41c32e46d3752164dea00ef941774d257f9c5660abe9d629ca2a520d1b2526e1"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_broadcast.py",
+      "bytes": 4805,
+      "sha256": "88aa80731ef7bd90bb0c35928b51267c47a2f688c0d886ee8e7c1628890cb184"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_core.py",
+      "bytes": 1702,
+      "sha256": "646b35502ecb8f4bbeb13ced1d5825b2aaea4226f07a9f60caacf7f7602f6d2d"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_lbw.py",
+      "bytes": 5290,
+      "sha256": "9132641bc83e0c5d9f0857c09e66f60b3dc999670a11c587f2c1a6dfbc93a397"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/tests/test_validate.py",
+      "bytes": 1322,
+      "sha256": "2c2e9c6155523c9724f5ec224de1d2a8c067b2dfa67eb00bc311d43b96e4290b"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker/cricket-ball-tracker/VALIDATION.md",
+      "bytes": 5787,
+      "sha256": "9afcda30c47f41410e8d3b7aa1b7e70b1d5de2ade474b2972eecb2ee4108fd68"
+    },
+    {
+      "path": "3rd Version/cricket-ball-tracker.zip",
+      "bytes": 1009070,
+      "sha256": "188d5ba8fbadc199077946f8ac4c876d003de9d5bfc835a8fa9b5ab9b902e3f0"
+    },
+    {
+      "path": "3rd Version/preview (1).webp",
+      "bytes": 81862,
+      "sha256": "2273f734f7dfe47d2d3bf54f12c7f74e05eeb5b960efb02dd31f8200fc54530b"
+    },
+    {
+      "path": "3rd Version/preview (2).webp",
+      "bytes": 47022,
+      "sha256": "4f22517f37de9736682f8750d76acef1644fa4583161a7fa03252da51f445ad7"
+    },
+    {
+      "path": "3rd Version/preview (3).webp",
+      "bytes": 64712,
+      "sha256": "5e9ae960269500934656acb6dce46040d315652d52696906b5c02e458a018efc"
+    },
+    {
+      "path": "3rd Version/preview (4).webp",
+      "bytes": 17080,
+      "sha256": "5f523e6572a5f43b0ca1b3cb2f1ec02cd94a85f7655c9874c6915349ab3442b2"
+    },
+    {
+      "path": "3rd Version/preview (5).webp",
+      "bytes": 15618,
+      "sha256": "f07e4e58a9677f2a54d84f1380dfe13a57d218a869e3d9e9519744e3f7eaab2c"
+    },
+    {
+      "path": "3rd Version/preview (6).webp",
+      "bytes": 76920,
+      "sha256": "ba83d925949d6ae35f403df260690a066f0e75849eea1a748b631e6a6794d7d9"
+    },
+    {
+      "path": "3rd Version/preview.webp",
+      "bytes": 56276,
+      "sha256": "eb4bcdf208dcfffecb517db3034afde11eb7d02b697af034157063b022963f9e"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/calibration_check.jpg",
+      "bytes": 356888,
+      "sha256": "6a95c98cd659cf1a1d3f1c0271bf2884a4349870e62263af1ce4e960b9d2dab4"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/camera.json",
+      "bytes": 835,
+      "sha256": "8b49861e3852fd1d424a09db7926c75767d5652975657e644a338a0bb78786b3"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/clicks.json",
+      "bytes": 627,
+      "sha256": "96837bb5ffc52e1154111db4f65083663cd80dfee527239ef92ae166cbc3aee8"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/console.html",
+      "bytes": 21521,
+      "sha256": "97e257f589948dfeb79ccd19ebfb394843eab953b27858d59df1d02017eb2292"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/console_media/broadcast.webm",
+      "bytes": 4789295,
+      "sha256": "99d2a0dc0165ef257e6ced9c67c5d145405e51328d5bbf91d5cd8bdb67da8179"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/delivery.png",
+      "bytes": 135909,
+      "sha256": "9d78c25ee8e51af2713510ef489deb79961b819bc62185a7fe2bb6c859f92f7d"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/replay.html",
+      "bytes": 689389,
+      "sha256": "a8768c1373860274cad93233e5b40f7a9dc0e8a89d5b938eb276519d0a745f42"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/report.json",
+      "bytes": 1278,
+      "sha256": "cd1d7d5f2e7b2067c6be8a1fbb9b6263b5874a12ec7670dbdf6345f6c6ed8662"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/track.json",
+      "bytes": 3831,
+      "sha256": "eac42a413e52fa5f3fe887f36a2c2a7f5d7944b7497f76847ee9e1387f264a8a"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW/tracked_footage.mp4",
+      "bytes": 3820533,
+      "sha256": "bf243182bb879a4b9a68a8782444c09bf4ab3ea2b838462ee5c9353498de5061"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results/Shamim_LBW_clicktool.html",
+      "bytes": 9322985,
+      "sha256": "37fe36b2d9decf377ca91245ecd698187478b351cb0881293fb4b30007b02b3e"
+    },
+    {
+      "path": "3rd Version/Shamim_LBW_results.zip",
+      "bytes": 16325216,
+      "sha256": "64a113f9d98c93ed3d11c42fdbd16fb3cb46032e27469c3ac88193aac4c9975c"
+    },
+    {
+      "path": "3rd Version/tracked_footage.mp4",
+      "bytes": 3820533,
+      "sha256": "bf243182bb879a4b9a68a8782444c09bf4ab3ea2b838462ee5c9353498de5061"
+    },
+    {
+      "path": "4th Version/cricket-ball-tracker.zip",
+      "bytes": 1009349,
+      "sha256": "83ce8b8ea8b9f9ae6aae2545ad4d7e0e646ec5eab0886127a6353a329006f824"
+    },
+    {
+      "path": "4th Version/Shamim_LBW_results.zip",
+      "bytes": 16329517,
+      "sha256": "9d8fdd2de56df4106d9fbf2138b3740a011c33cc9f8e4328cb74d89544a8d9d4"
+    },
+    {
+      "path": "4th Version/tracked_footage.mp4",
+      "bytes": 3813703,
+      "sha256": "f86305a1a245ad3372a6ac958e30cbca5c239e26a6f8eff4763cd794ba99fc08"
+    },
+    {
+      "path": "5th version/cricket-ball-tracker (1).zip",
+      "bytes": 1023798,
+      "sha256": "b2df00cf7c9b6568c07dce0a0911ddde9896bec1212d11aefa2ef152eb530c18"
+    },
+    {
+      "path": "5th version/DRS_package.mp4",
+      "bytes": 10890829,
+      "sha256": "3f0fdccdd9e2343ddb4beb4780288a4523abb4ee26090a7529bbee056aa46aeb"
+    },
+    {
+      "path": "5th version/report.pdf",
+      "bytes": 2636180,
+      "sha256": "4bc1830f0323aaaf5eae43a3e6a8b8c99bfa7079a1060fd18e96da51a211d998"
+    },
+    {
+      "path": "5th version/Shamim_LBW_results.zip",
+      "bytes": 25933304,
+      "sha256": "1c6939125c78feb7d3f5391df163d89085f239224fef3e0a46ec917e5daeb0a2"
+    },
+    {
+      "path": "Shamim LBW.mp4",
+      "bytes": 31764001,
+      "sha256": "1d92527c3d00ea245eb6bca889d9379fd0ccc40146d65a076d98d61927eb1069"
+    },
+    {
+      "path": "YTDown.com_YouTube_Media_7AETq9LX-jQ_Plumbest-LBW-s-in-Cricket-History_001_480p.mp4",
+      "bytes": 14260260,
+      "sha256": "a71c4bc68551ad744e7831d7c3dd564dd760d0f9637659827ed981891b0559a5"
+    }
+  ]
+}
