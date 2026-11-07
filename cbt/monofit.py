@@ -144,7 +144,8 @@ class MonoFit:
             p.append(f"path fits the ball positions poorly ({self.rms_px:.1f}px rms)")
         return p
 
-    def report(self, handed="right", n_mc=500, seed=0, on_field="not out", shot_offered=True):
+    def report(self, handed="right", n_mc=500, seed=0, on_field="not out", shot_offered=True,
+               extra_problems=()):
         rng = np.random.default_rng(seed)
         sxz = np.array([self.stumps(q) for q in self.sample_params(n_mc, rng)])
         bsig = np.sqrt(np.clip(np.diag(self.cov)[[1, 0]], 0, None))
@@ -154,7 +155,7 @@ class MonoFit:
         n_in = int(self.inlier.sum())
         return lbw.build_report(
             self.bounce, self.impact, self.stumps(), sxz, bsig, None, handed, on_field,
-            shot_offered, self.problems(),
+            shot_offered, [*self.problems(), *extra_problems],
             extra=dict(rms_px=round(self.rms_px, 2), n_obs=len(self.obs_uv), n_inliers=n_in,
                        n_after_bounce=int(np.sum(self.s[self.inlier] < 0)),
                        method="single camera, time-free", impact_prior=self.impact_prior,

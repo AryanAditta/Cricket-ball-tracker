@@ -159,6 +159,7 @@ def run_demo(args):
 
 def _write_replay(r, rep, truth, handed, outdir, source, video=False, name="replay"):
     from . import replay
+    from .browser import BrowserUnavailable
     data = replay.replay_data(r, rep, truth=truth, handed=handed, source=source,
                               badge="simulation" if truth is not None else "")
     html = replay.write_replay(os.path.join(outdir, f"{name}.html"), data)
@@ -166,9 +167,8 @@ def _write_replay(r, rep, truth, handed, outdir, source, video=False, name="repl
         try:
             mp4 = replay.render_video(html, os.path.join(outdir, f"{name}.mp4"))
             print(f"replay video: {mp4}")
-        except ImportError:
-            print("--video needs: pip install playwright && python -m playwright install chromium "
-                  "(or use the Record button in the replay page)")
+        except BrowserUnavailable as exc:
+            print(f"Replay video skipped: {exc}")
     return html
 
 
@@ -221,7 +221,9 @@ def run_videostudy(args):
 # ------------------------------------------------------------------ real-data path
 def run_calibrate(args):
     """points CSV: name,u,v  (names from `python -m cbt landmarks`)."""
-    K = np.array(json.load(open(args.intrinsics))["K"])
+    with open(args.intrinsics, encoding="utf-8") as f:
+        intrinsics = json.load(f)
+    K = np.array(intrinsics["K"])
     lm = landmarks()
     names, uv = [], []
     for line in open(args.points):
@@ -230,7 +232,8 @@ def run_calibrate(args):
         n, u, v = line.strip().split(",")
         names.append(n); uv.append((float(u), float(v)))
     W = np.array([lm[n] for n in names])
-    cam, rms = calibrate_pose(K, np.array(uv), W, name=args.name, fps=args.fps,
+    cam, rms = calibrate_pose(K, np.array(uv), W, dist=intrinsics.get("dist"),
+                              size=intrinsics.get("size", (1920, 1080)), name=args.name, fps=args.fps,
                               time_offset=args.time_offset)
     cams = load_cameras(args.out) if os.path.exists(args.out) else []
     cams = [c for c in cams if c.name != args.name] + [cam]
@@ -257,12 +260,47 @@ def run_detect(args):
 def run_fit(args):
     cams = {c.name: c for c in load_cameras(args.cams)}
     obs, used = [], []
-    for spec in args.track:              # camname=path
-        name, path = spec.split("=", 1)
+    videos = dict(spec.split("=", 1) for spec in args.camera_video)
+    if args.track:
+        sources = [spec.split("=", 1) for spec in args.track]
+    else:
+        sources = list(videos.items())
+        if len(sources) < 2:
+            raise SystemExit("Provide --track, or at least two calibrated --camera-video feeds.")
+        from .detect import MotionDetector, YoloDetector, detect_video
+        from .track2d import delivery_track
+        from .broadcast import video_info
+        detector = YoloDetector(args.weights) if args.weights else None
+    seen = set()
+    spans = []
+    for name, path in sources:
+        if name in seen or name not in cams:
+            raise SystemExit(f"Camera '{name}' must be distinct and listed in {args.cams}.")
+        seen.add(name)
         cam = cams[name]
-        ci = len(used); used.append(cam)
-        tr = np.loadtxt(path, delimiter=",", skiprows=1, ndmin=2)
-        obs += [(ci, row[1] - cam.time_offset, row[2:4]) for row in tr]
+        ci = len(used)
+        used.append(cam)
+        if args.track:
+            tr = np.loadtxt(path, delimiter=",", skiprows=1, ndmin=2)
+            rate = 1.0
+        else:
+            active_detector = detector or MotionDetector(ball_colour=args.ball)
+            tr = delivery_track(detect_video(path, active_detector))
+            if tr is None:
+                raise RuntimeError(f"No delivery found for {name}. Supply a checked track using --track.")
+            rate = video_info(path)["fps"] / cam.fps
+            print(f"{name}: tracked {len(tr)} positions at capture rate {cam.fps:g} fps")
+        times = rate * tr[:, 1] - cam.time_offset
+        keep = times <= args.impact_time if args.impact_time is not None else np.ones(len(times), bool)
+        if not keep.any():
+            raise RuntimeError(f"No observations before impact for {name}. Check its clock offset.")
+        obs += [(ci, t, uv) for t, uv in zip(times[keep], tr[keep, 2:4])]
+        spans.append((times[keep].min(), times[keep].max()))
+    if not args.track and max(a for a, _ in spans) >= min(b for _, b in spans):
+        raise RuntimeError("The camera tracks do not overlap. Check the capture rates and clock offsets.")
+    if max(sum(o[0] == i for o in obs) for i in range(len(used))) < 9:
+        raise RuntimeError("At least one camera needs nine detections to fit the bounce.")
+    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     r = fitmod.fit(obs, used, px_sigma=args.px_sigma)
     if args.cut_y:          # validation Test B: pretend a pad stopped the ball at y = cut_y
         ts = np.linspace(r.tb, r.t_last, 400)
@@ -344,7 +382,9 @@ def run_broadcast(args):
     on_field = (args.on_field or cl.get("on_field") or "not out").replace("-", " ")
     res = process(args.video, cl, args.outdir, handed=handed, bowler=args.bowler,
                   speed_kmh=args.speed_kmh, on_field=on_field,
-                  shot_offered=not args.no_shot, render_video=not args.no_video)
+                  shot_offered=not args.no_shot, render_video=not args.no_video,
+                  shot=args.shot, ball=args.ball, weights=args.weights, stabilize=args.stabilize,
+                  speed_roi=args.speed_roi)
     print()
     print(summary(res["report"]))
     print()
@@ -365,22 +405,37 @@ def run_analyse(args):
     on_field = (args.on_field or cl.get("on_field") or "not out").replace("-", " ")
     outdir = args.outdir or os.path.join("results", os.path.splitext(os.path.basename(args.video))[0])
     res = process(args.video, cl, outdir, handed=handed, bowler=args.bowler, speed_kmh=args.speed_kmh,
-                  on_field=on_field, shot_offered=not args.no_shot)
-    package.build_package(res, outdir, angles=not args.no_angles)
+                  on_field=on_field, shot_offered=not args.no_shot,
+                  shot=args.shot, ball=args.ball, weights=args.weights, stabilize=args.stabilize,
+                  speed_roi=args.speed_roi, on_result=lambda rep: print("\n" + summary(rep), flush=True))
+    print(f"Open {os.path.join(outdir, 'console.html')} to review while exports finish.", flush=True)
+    if not args.review_only:
+        package.build_package(res, outdir, angles=not args.no_angles, angle_height=args.angle_height)
     html, pdf = report.build(res, outdir)
-    print()
-    print(summary(res["report"]))
     print(f"\ndone in {time.time() - t0:.0f} s -> {outdir}")
-    for f in ("DRS_package.mp4", "report.pdf", "tracked_footage.mp4", "console.html", "replay.html",
-              "pictures", "REPORT.txt", "report.json"):
-        if os.path.exists(os.path.join(outdir, f)):
-            print(f"  {os.path.join(outdir, f)}")
+    outputs = ["tracked_footage.mp4", "console.html", "replay.html", "report.html", "REPORT.txt", "report.json"]
+    if not args.review_only:
+        outputs += ["DRS_package.mp4", "pictures"]
+    if pdf:
+        outputs.append("report.pdf")
+    for name in outputs:
+        print(f"  {os.path.join(outdir, name)}")
 
 
 def run_clicktool(args):
     from .clicktool import build
     path = build(args.video, args.out, shot=args.shot)
     print(f"open in Chrome/Edge: {path}")
+
+
+def _broadcast_input_options(parser):
+    parser.add_argument("--shot", type=int, nargs=2, metavar=("FIRST", "LAST"),
+                        help="inclusive replay frame range")
+    parser.add_argument("--ball", choices=("red", "white"), default="red")
+    parser.add_argument("--weights", help="optional cricket-ball YOLO weights")
+    parser.add_argument("--stabilize", action="store_true", help="correct small pans and zooms")
+    parser.add_argument("--speed-roi", type=int, nargs=4, metavar=("X", "Y", "WIDTH", "HEIGHT"),
+                        help="suggest a speed from this km/h graphic region with Tesseract")
 
 
 def main(argv=None):
@@ -453,7 +508,7 @@ def main(argv=None):
 
     s = sub.add_parser("fit")
     s.add_argument("--cams", default="cameras.json")
-    s.add_argument("--track", nargs="+", required=True, help="camname=track.csv ...")
+    s.add_argument("--track", nargs="+", help="camname=track.csv ...")
     s.add_argument("--handed", choices=["right", "left"], default="right")
     s.add_argument("--px-sigma", type=float, default=1.5)
     s.add_argument("--out", default="delivery")
@@ -464,7 +519,10 @@ def main(argv=None):
                    help="validation: drop detections after the ball reaches this distance (m) "
                         "from the stumps, as if a pad were there")
     s.add_argument("--camera-video", nargs="+", default=[],
-                   help="camname=video.mp4 ... to build the operator console")
+                   help="camname=video.mp4 ... to build the console or detect without --track")
+    s.add_argument("--impact-time", type=float, help="last usable timestamp on the common camera clock")
+    s.add_argument("--ball", choices=("red", "white"), default="red", help="colour for automatic detection")
+    s.add_argument("--weights", help="YOLO cricket-ball weights for automatic detection")
     s.set_defaults(fn=run_fit)
 
     s = sub.add_parser("analyse", aliases=["analyze"],
@@ -480,6 +538,10 @@ def main(argv=None):
     s.add_argument("--bowler", choices=["pace", "medium", "spin"], default=None)
     s.add_argument("--speed-kmh", type=float, default=None, help="speed-gun reading if shown")
     s.add_argument("--no-angles", action="store_true", help="skip the 3D angle videos (faster)")
+    s.add_argument("--angle-height", type=int, choices=[480, 720, 1080], default=720,
+                   help="height of rendered 3D angles (480 is faster)")
+    s.add_argument("--review-only", action="store_true", help="skip the presentation video")
+    _broadcast_input_options(s)
     s.set_defaults(fn=run_analyse)
 
     s = sub.add_parser("clicktool", help="make the page for clicking calibration points on a clip")
@@ -502,6 +564,7 @@ def main(argv=None):
                    help="on-field decision (default: from clicks.json, else not-out)")
     s.add_argument("--no-shot", action="store_true", help="batter offered no shot")
     s.add_argument("--no-video", action="store_true", help="skip rendering tracked_footage.mp4")
+    _broadcast_input_options(s)
     s.set_defaults(fn=run_broadcast)
 
     s = sub.add_parser("validate", help="score the system against field ground truth (VALIDATION.md)")

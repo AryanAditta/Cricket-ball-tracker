@@ -206,6 +206,7 @@ const P = {
   torso: new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.34, 8, 20), mat(KIT.whites)),
   upperF: limb(0.05, 0.045, mat(KIT.whites)), upperB: limb(0.05, 0.045, mat(KIT.whites)),
   foreF: limb(0.042, 0.038, mat(KIT.whites)), foreB: limb(0.042, 0.038, mat(KIT.whites)),
+  elbowF: ball(0.044, mat(KIT.whites)), elbowB: ball(0.044, mat(KIT.whites)),
   gloveF: ball(0.055, mat(KIT.glove, 0.8)), gloveB: ball(0.055, mat(KIT.glove, 0.8)),
   neck: limb(0.05, 0.055, mat(KIT.skin)),
   face: ball(0.1, mat(KIT.skin)), helmet: ball(0.125, mat(KIT.helmet, 0.35)),
@@ -222,7 +223,44 @@ for (let i = 0; i < 3; i++) {
 }
 const blade = new THREE.Mesh(new THREE.BoxGeometry(0.108, 0.045, 0.56), mat(KIT.blade, 0.55));
 blade.castShadow = true; batter.add(blade);
-const shoes = [0, 1].map(() => { const s = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.28, 0.08), mat(KIT.shoe, 0.6)); s.castShadow = true; batter.add(s); return s; });
+const shoes = [0, 1].map(() => {
+  const shoe = new THREE.Group();
+  const upper = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), mat(KIT.shoe, 0.65));
+  upper.scale.set(0.058, 0.14, 0.046);
+  upper.castShadow = true;
+  const sole = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), mat(0xdad8d1));
+  sole.scale.set(0.059, 0.143, 0.014);
+  sole.position.z = -0.032;
+  shoe.add(upper, sole);
+  batter.add(shoe);
+  return shoe;
+});
+
+// Tapered pads with raised channels and rear straps. The details follow the posed shin.
+const padRib = mat(0xf2f2ee, 0.76), strapMat = mat(0xc9cccf);
+for (const pad of [P.padF, P.padB]) {
+  for (const x of [-0.038, 0, 0.038]) {
+    const rib = new THREE.Mesh(new THREE.CapsuleGeometry(0.009, 0.70, 4, 8), padRib);
+    rib.position.set(x, 0, x ? -0.068 : -0.077);
+    pad.add(rib);
+  }
+  for (const y of [-0.27, 0.25]) {
+    const strap = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.047, 0.018), strapMat);
+    strap.position.set(0, y, 0.057);
+    pad.add(strap);
+  }
+}
+const shoulder = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), mat(KIT.whites));
+shoulder.scale.set(0.158, 0.195, 0.09);
+shoulder.castShadow = true;
+batter.add(shoulder);
+const waist = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), mat(0xe4e2d9));
+waist.scale.set(0.146, 0.162, 0.065);
+batter.add(waist);
+const bladeSticker = new THREE.Mesh(new THREE.PlaneGeometry(0.061, 0.12), mat(0x28564a));
+bladeSticker.rotation.x = -Math.PI / 2;
+bladeSticker.position.set(0, 0.023, -0.08);
+blade.add(bladeSticker);
 
 // pose: the struck pad ends exactly where the tracker says the ball hit
 const IMP = V(D.impact.p);
@@ -269,7 +307,9 @@ function poseBatter(p) {
   // torso leans towards the bowler as the stride lands
   const S = H.clone().add(new THREE.Vector3(sx(0.04), 0.06 + 0.16 * s, 0.50 - 0.04 * s));
   place(P.torso, H.clone().setZ(H.z + 0.06), S);
-  P.torso.scale.set(1.0, 0.92, 1.0);
+  P.torso.scale.set(0.95, 0.92, 1.05);
+  shoulder.position.copy(S).add(new THREE.Vector3(0, 0, 0.028));
+  waist.position.copy(H).add(new THREE.Vector3(0, 0.015, 0.14));
   const shF = S.clone().add(new THREE.Vector3(0, 0.17, 0.08)), shB = S.clone().add(new THREE.Vector3(0, -0.17, 0.08));
   const neckTop = S.clone().add(new THREE.Vector3(0, 0.03, 0.2));
   place(P.neck, S.clone().setZ(S.z + 0.08), neckTop);
@@ -278,12 +318,16 @@ function poseBatter(p) {
   P.helmet.position.copy(head).add(new THREE.Vector3(0, -0.012, 0.03));
   peak.position.copy(head).add(new THREE.Vector3(0, 0.12, 0.08)); peak.rotation.x = -0.25;
   grille.position.copy(head).add(new THREE.Vector3(0, 0.115, -0.02));
+  grille.rotation.x = -0.13;
   // hands together in front of the body, bat angled down past the front pad
-  const hands = H.clone().add(new THREE.Vector3(sx(0.30), 0.10 + 0.12 * s, 0.05 - 0.05 * s));
+  const lift = Math.sin(Math.PI * s) * 0.10;
+  const hands = H.clone().add(new THREE.Vector3(sx(0.27 + 0.03 * s), 0.10 + 0.12 * s, 0.05 - 0.05 * s + lift));
   const elbF = shF.clone().lerp(hands, 0.5).add(new THREE.Vector3(sx(0.10), 0.05, -0.03));
   const elbB = shB.clone().lerp(hands, 0.5).add(new THREE.Vector3(sx(0.12), -0.02, -0.06));
   place(P.upperF, elbF, shF); place(P.foreF, hands, elbF);
   place(P.upperB, elbB, shB); place(P.foreB, hands, elbB);
+  P.elbowF.position.copy(elbF);
+  P.elbowB.position.copy(elbB);
   P.gloveF.position.copy(hands).add(new THREE.Vector3(0, 0, 0.05));
   P.gloveB.position.copy(hands).add(new THREE.Vector3(0, 0, -0.05));
   const top = hands.clone().add(new THREE.Vector3(0, 0, 0.12));
@@ -370,7 +414,7 @@ const COL = { red: 0xd8232a, green: 0x1f9d55, amber: 0xf0a020, grey: 0x8a96a3 };
 const zone = new THREE.Mesh(new THREE.PlaneGeometry(2 * STUMP_HW, STUMP_H + 0.0127),
   new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.0, depthWrite: false, side: THREE.DoubleSide }));
 zone.rotation.x = Math.PI / 2; zone.position.set(0, 0.03, (STUMP_H + 0.0127) / 2); scene.add(zone);
-const sig = D.stumps_sigma.map((v) => (isFinite(v) ? v : 0.3));
+const sig = D.stumps_sigma.map((v) => (Number.isFinite(v) ? v : 0.3));
 const unc = new THREE.Mesh(new THREE.RingGeometry(0.97, 1.0, 64),
   new THREE.MeshBasicMaterial({ color: 0x2e7bd6, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
 unc.rotation.x = Math.PI / 2;
@@ -393,20 +437,9 @@ const ctx = {
   onField: Q.get("onfield") || rep.on_field || "not out",
   shot: Q.has("shot") ? Q.get("shot") !== "0" : (rep.shot_offered !== undefined ? rep.shot_offered : true),
 };
-function decide(p, i, w, onField, shot, drule) {
-  const r = (d, uc, why) => ({ decision: d, umpiresCall: uc, reason: why });
-  if (p === "outside leg") return r("not out", false, "pitched outside leg");
-  if (i === "outside leg") return r("not out", false, "impact outside leg");
-  if (i === "outside off" && shot) return r("not out", false, "impact outside off, shot offered");
-  if (w === "missing") return r("not out", false, "missing the stumps");
-  if (w === "inconclusive") return r(onField, true, "insufficient tracking data");
-  if (i === "umpires call") return r(onField, true, "umpire's call on impact");
-  if (w === "umpires call") return r(onField, true, "umpire's call on wickets");
-  if (drule) return r(onField, true, `${drule} rule`);
-  return r("out", false, "LBW");
-}
+/*__DECISIONS__*/
 function finalDecision() {
-  const d = decide(rep.pitching, rep.impact, rep.wickets, ctx.onField, ctx.shot, rep.distance_rule);
+  const d = reviewDecision(rep, ctx.onField, ctx.shot);
   const word = d.decision.toUpperCase();
   if (rep.wickets === "inconclusive")
     return ["NO DECISION", "grey", `insufficient tracking data · on-field ${word} stands`, d];
@@ -510,7 +543,7 @@ function renderAt(t) {
   const showZone = t >= TL.t3;
   zone.material.opacity = showZone ? 0.18 : 0;
   zone.material.color.setHex(hitting ? COL.red : clipping ? COL.amber : 0xffffff);
-  unc.material.opacity = t >= TL.t4 ? 0.9 : 0;
+  unc.material.opacity = t >= TL.t4 && D.stumps_xz.every(Number.isFinite) ? 0.9 : 0;
   // stumps reaction
   const hitT = t - TL.t4;
   striker.stumps.forEach((s) => s.material.color.setHex(
@@ -611,7 +644,7 @@ function drawOverlay(t, tauF) {
     text(FINAL[2].toUpperCase(), W / 2, by + 94 * u, 16 * u, "rgba(255,255,255,0.92)", 700, "center");
     // confidence line
     const c = rep.wickets_confidence;
-    const conf = `tracking confidence — hitting ${(100 * c.hitting).toFixed(0)}% · umpire's call ${(100 * c["umpires call"]).toFixed(0)}% · missing ${(100 * c.missing).toFixed(0)}%   ·   ±${(200 * sig[0]).toFixed(1)} cm at the stumps`;
+    const conf = `sampled paths — hitting ${(100 * c.hitting).toFixed(0)}% · umpire's call ${(100 * c["umpires call"]).toFixed(0)}% · missing ${(100 * c.missing).toFixed(0)}%   ·   ±${(200 * sig[0]).toFixed(1)} cm at the stumps`;
     og.fillStyle = "rgba(10,22,36,0.8)"; const cw = Math.min(W - 48 * u, 980 * u);
     rr(W / 2 - cw / 2, by - 50 * u, cw, 36 * u, 8 * u); og.fill();
     text(conf, W / 2, by - 32 * u, 16 * u, "#dfe7ee", 600, "center");

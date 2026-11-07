@@ -71,6 +71,12 @@ Leave a column empty when it wasn't measured. Each delivery's report is `<report
 python -m cbt validate --truth truth.csv --reports reports --manifest tracks.csv --cams cameras.json --out results/trial1
 ```
 
+## Wicket probability and missing speed
+
+The validation report groups predicted miss probabilities into bands and compares them with observed misses. For this comparison, use a stump camera or independent crossing measurement to distinguish a true miss from contact that did not dislodge a bail. Use a held-out field session to evaluate calibration. The simulated report exercises the scoring code.
+
+Speed errors are reported with the number of radar deliveries that could be scored. Single-camera estimates can be included when available, with their source shown in the per-delivery CSV. A speed estimate fitted using an entered speed-gun reading is excluded from independent speed scoring.
+
 ## What the targets mean
 
 The targets in `cbt/validate.py` (`TARGETS`) are a starting point for a **domestic ADRS trial**, not a published ICC standard. Professional systems quote average errors of a few millimetres on the observed path. Agree the final numbers with BCB before the trial, and publish the full validation report with the results, including the failures. Critics of ball tracking have long argued that hiding the margin of error is the real problem ([The Conversation](https://theconversation.com/out-goal-the-ball-was-in-but-could-hawk-eye-get-it-wrong-20741)), so showing it openly is a strength.

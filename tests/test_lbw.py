@@ -75,10 +75,11 @@ def test_review_outcome():
 
 
 def test_replay_js_matches_python(tmp_path):
-    """The replay page re-implements decide() in JavaScript; keep them identical."""
+    """Verify the offline decision table and failed-track handling in Chromium."""
     import itertools
     import numpy as np
-    pw = pytest.importorskip("playwright.sync_api")
+    import os
+    from cbt.browser import BrowserUnavailable, chromium_browser, file_url
     from cbt import sim, rigs, fit, replay
     rng = np.random.default_rng(3)
     d = None
@@ -89,23 +90,30 @@ def test_replay_js_matches_python(tmp_path):
     html = replay.write_replay(str(tmp_path / "r.html"), replay.replay_data(r, r.report()))
     cases = [list(c) for c in itertools.product(
         ["in line", "outside off", "outside leg"], ["in line", "umpires call", "outside off", "outside leg"],
-        ["hitting", "umpires call", "missing", "inconclusive"], ["out", "not out"], [True, False], [None, "3m"])]
+        ["hitting", "umpires call", "missing", "inconclusive"], ["out", "not out"], [True, False], [None, "3m", "2.5m/40cm"])]
     try:
-        with pw.sync_playwright() as p:
-            b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
+        with chromium_browser(["--use-gl=angle", "--use-angle=swiftshader",
+                               "--enable-unsafe-swiftshader"]) as b:
             pg = b.new_page()
-            pg.goto(f"file://{html}?capture")
+            pg.goto(file_url(html, capture=True))
             pg.wait_for_function("window.REPLAY !== undefined")
             js = pg.evaluate("cs => cs.map(c => { const d = REPLAY.decide(...c); return [d.decision, d.umpiresCall]; })", cases)
-            # the operator console carries its own copy too
             from cbt.console import build_console
-            con = build_console(str(tmp_path), [], r, r.report())
-            pg.goto(f"file://{con}")
+            rep = r.report()
+            rep.update(status="NO DECISION: incomplete track", pitching="outside leg",
+                       wickets="inconclusive", decision="out", on_field="out")
+            con = build_console(str(tmp_path), [], r, rep)
+            pg.goto(file_url(con))
             pg.wait_for_function("window.CONSOLE !== undefined")
             js2 = pg.evaluate("cs => cs.map(c => { const d = CONSOLE.decide(...c); return [d.decision, d.umpiresCall]; })", cases)
-            b.close()
-    except Exception as e:                      # no browser installed
-        pytest.skip(f"headless browser unavailable: {e}")
+            assert pg.locator("#verdict .big").inner_text() == "NO DECISION"
+            note = pg.locator("#verdict .small").first.text_content()
+            assert note.startswith("OUT · ") and "on-field decision stands" in note
+            assert not pg.locator("#fast").is_visible()
+    except BrowserUnavailable as e:
+        if os.environ.get("CBT_REQUIRE_BROWSER"):
+            raise
+        pytest.skip(str(e))
     assert js == js2
     for c, j in zip(cases, js):
         d = lbw.decide(*c)

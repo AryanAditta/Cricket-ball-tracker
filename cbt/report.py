@@ -5,6 +5,8 @@ import html as H
 import os
 
 from .footage import final_banner, _verdict_colour
+from .browser import BrowserUnavailable, chromium_browser, file_url
+from .lbw import decision_rows
 
 HEX = dict(red="#d8232a", green="#1f9d55", amber="#e8961a", grey="#6b7785")
 
@@ -25,6 +27,7 @@ def text_report(rep):
     from .broadcast_run import summary
     c = rep.get("calibration", {})
     sp = rep.get("speed_estimate_kmh") or rep.get("release_speed_kmh")
+    evidence = "\n".join(f"  {label}: {value} | {limit}" for label, value, limit in decision_rows(rep))
     return f"""LBW BALL-TRACKING REPORT
 Clip: {rep.get('source', '')} (replay shot, frames {rep.get('shot_frames', ['?', '?'])[0]}-{rep.get('shot_frames', ['?', '?'])[1]})
 Method: {rep.get('method', '')}
@@ -38,9 +41,13 @@ PROTOCOL
   3 Wickets  : {rep['wickets'].upper():12s} crossing the stumps at x {rep['stumps_xz_m'][0]:+.3f} m, height {rep['stumps_xz_m'][1]:.3f} m
   4 Distance : {rep['distance_rule'] or 'no rule applies'} (impact->stumps {rep['impact_to_stumps_m']:.2f} m, pitch->impact {rep['pitch_to_impact_m']:.2f} m)
 
+DECISION MEASUREMENTS (positive sideways values towards off)
+{evidence}
+
 INPUTS
   calibration: {rep.get('calibration_source', '')}; rms {c.get('rms_px')} px, focal {c.get('focal_px')} px, camera at {c.get('camera_position_m')} m
   front foot at impact: {rep.get('front_foot') or 'not used'} {rep.get('front_foot_px') or ''}
+  speed-gun input: {rep.get('speed_gun_kmh') or 'not supplied'} · OCR suggestion: {rep.get('speed_ocr_suggestion_kmh') or 'none'}
 
 TRACKING
   {rep['n_inliers']}/{rep['n_obs']} ball positions used, {rep['n_after_bounce']} after the bounce, fit rms {rep['rms_px']} px
@@ -57,17 +64,14 @@ def build(res, outdir, log=print):
         f.write(_html(rep, outdir))
     pdf = os.path.join(outdir, "report.pdf")
     try:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            b = p.chromium.launch()
-            pg = b.new_page()
-            pg.goto("file://" + os.path.abspath(path))
-            pg.wait_for_load_state("networkidle")
+        with chromium_browser() as browser:
+            pg = browser.new_page()
+            pg.goto(file_url(path))
+            pg.wait_for_load_state("load")
             pg.pdf(path=pdf, format="A4", print_background=True,
                    margin=dict(top="14mm", bottom="14mm", left="12mm", right="12mm"))
-            b.close()
-    except ImportError:
-        log("report.pdf skipped (needs playwright); report.html has the same content")
+    except BrowserUnavailable as exc:
+        log(f"report.pdf skipped: {exc}. Open report.html for the written report.")
         pdf = None
     return path, pdf
 
@@ -127,6 +131,15 @@ def _html(rep, outdir):
     ]
     mrows = "".join(f"<tr><td>{H.escape(a)}</td><td><b>{H.escape(b)}</b></td><td class=mute>{H.escape(c_)}</td></tr>"
                     for a, b, c_ in meas)
+    evidence = "".join("<tr>" + "".join(f"<td>{H.escape(item)}</td>" for item in row) + "</tr>"
+                       for row in decision_rows(rep))
+    angles = "".join((
+        _pic(outdir, "10_3d_auto.jpg", "Main view at the decision"),
+        _pic(outdir, "13_3d_stumps.jpg", "At the stumps: projected path and wicket zone"),
+        _pic(outdir, "12_3d_side.jpg", "Side-on: bounce, impact and projection height"),
+        _pic(outdir, "20_pitch_map.jpg", "Pitch map: where the ball bounced"),
+    ))
+    angle_section = f'<h2 class="pb">3D replay</h2><div class="grid">{angles}</div>' if angles else ""
     low = ('<p class="warn"><b>Low confidence.</b> The spread of plausible paths is wide for this ball, so the call '
            'rests on the best-estimate path. A second camera angle would narrow it.</p>') if rep.get("low_confidence") else ""
     when = datetime.datetime.now().strftime("%d %b %Y, %H:%M")
@@ -135,7 +148,7 @@ def _html(rep, outdir):
 @page {{ size: A4; }}
 body {{ font: 11pt/1.45 "DejaVu Sans", Arial, sans-serif; color: #18232f; margin: 0; }}
 h1 {{ font-size: 20pt; margin: 0; letter-spacing: .02em; }}
-h2 {{ font-size: 12.5pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #e3e8ee; }}
+h2 {{ font-size: 12.5pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #e3e8ee; break-after: avoid; }}
 .head {{ display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid #0a1624; padding-bottom: 8px; }}
 .meta {{ color: #5b6b7b; font-size: 9.5pt; text-align: right; }}
 .dec {{ margin: 16px 0; border-radius: 10px; color: #fff; padding: 16px 20px; background: {HEX[col]}; }}
@@ -143,6 +156,7 @@ h2 {{ font-size: 12.5pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom:
 .dec .why {{ font-size: 11pt; opacity: .95; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 10pt; }}
 td {{ padding: 7px 8px; border-bottom: 1px solid #e3e8ee; vertical-align: top; }}
+th {{ text-align: left; padding: 7px 8px; border-bottom: 2px solid #e3e8ee; }}
 td.n {{ width: 18px; color: #8896a5; font-weight: 700; }}
 .chip {{ display: inline-block; color: #fff; font-weight: 700; font-size: 9pt; padding: 3px 9px; border-radius: 5px; white-space: nowrap; }}
 .rule {{ color: #7a8896; font-size: 8.5pt; margin-top: 3px; }}
@@ -171,16 +185,15 @@ ul {{ padding-left: 18px; font-size: 10pt; }}
 {_pic(outdir, "11_3d_umpire.jpg", "3D replay · umpire's view")}
 </div>
 
-<h2 class="pb">Measurements</h2>
+<h2 class="pb">Decision measurements</h2>
+<p class="mute">Positive sideways values are towards off. Limits show the rules used for this review.</p>
+<table><thead><tr><th>Measurement</th><th>Value</th><th>Rule boundary</th></tr></thead>
+<tbody>{evidence}</tbody></table>
+
+<h2>Tracking measurements</h2>
 <table>{mrows}</table>
 
-<h2>3D replay</h2>
-<div class="grid">
-{_pic(outdir, "10_3d_auto.jpg", "Main view at the decision")}
-{_pic(outdir, "13_3d_stumps.jpg", "At the stumps: the projected path against the wicket zone")}
-{_pic(outdir, "12_3d_side.jpg", "Side-on: height of the ball through bounce, impact and the stumps")}
-{_pic(outdir, "20_pitch_map.jpg", "Pitch map: where the ball bounced")}
-</div>
+{angle_section}
 
 <h2 class="pb">How it was measured</h2>
 <div class="grid">
@@ -190,7 +203,7 @@ ul {{ padding-left: 18px; font-size: 10pt; }}
 </div>
 <ul>
 <li><b>Camera.</b> The broadcast camera's position, direction and zoom are solved from the painted creases at both ends.</li>
-<li><b>Ball.</b> The ball is found in every frame of the replay as a small dark, red-brown blob that moves along a smooth path; frames repeated by the slow motion are merged.</li>
+<li><b>Ball.</b> Candidates for the {H.escape(rep.get('ball_colour', 'red'))} ball are found using {H.escape(rep.get('detector', 'foreground'))} detection and linked into a smooth path. Repeated positions are merged.</li>
 <li><b>Path.</b> A physical path is fitted: two arcs under gravity joined by a bounce on the pitch. Broadcast slow motion has no usable timing, so only the order of the ball positions is used, and speed comes out as an estimate.</li>
 <li><b>Impact.</b> The front foot's position at impact fixes how far down the pitch the ball hit the pad.</li>
 <li><b>Decision.</b> The LBW protocol is applied to the best-estimate path. The percentages show how the call could change within the measurement uncertainty.</li>
@@ -198,7 +211,7 @@ ul {{ padding-left: 18px; font-size: 10pt; }}
 <h2>Limits</h2>
 <ul>
 <li>One camera behind the bowler measures sideways movement well but distance down the pitch less well, so its projection is wider than a multi-camera system's.</li>
-<li>The footage must be from behind the bowler with no zoom or pan during the delivery, and a red ball.</li>
+<li>Use an end-on shot with both creases visible. The fixed-camera mode is the default. Stabilization and white-ball detection are experimental.</li>
 <li>Check the playing conditions (distance rules, wicket zone) against the competition's own before match use.</li>
 </ul>
 </body></html>"""

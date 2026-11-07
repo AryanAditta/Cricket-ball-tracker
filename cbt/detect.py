@@ -83,6 +83,15 @@ class MotionDetector:
                 if redness < self.min_redness:
                     continue
                 score = circ * redness
+            elif self.ball_colour == "white":
+                mask = np.zeros((h, w), np.uint8)
+                cv2.drawContours(mask, [cn - (x, y)], -1, 255, -1)
+                colour = cv2.mean(frame[y:y + h, x:x + w], mask=mask)[:3]
+                background = cv2.mean(bgimg[y:y + h, x:x + w], mask=mask)[:3]
+                contrast = np.mean(colour) - np.mean(background)
+                if min(colour) < 150 or max(colour) - min(colour) > 60 or contrast < 12:
+                    continue
+                score = circ * contrast / 255
             M = cv2.moments(cn)
             out.append((M["m10"] / M["m00"], M["m01"] / M["m00"], float(score)))
         out.sort(key=lambda x: -x[2])

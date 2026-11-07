@@ -89,7 +89,8 @@ def test_progress_interpolates_between_samples():
 
 def test_report_without_measured_speed_renders(tmp_path):
     """Single-camera reports carry speed=None; every output must cope."""
-    pw = pytest.importorskip("playwright.sync_api")
+    import os
+    from cbt.browser import BrowserUnavailable, chromium_browser, file_url
     from cbt import replay, viz
     cam = broadcast_cam()
     rng = np.random.default_rng(3)
@@ -103,14 +104,17 @@ def test_report_without_measured_speed_renders(tmp_path):
     viz.figure(f, rep=rep, path=str(tmp_path / "d.png"))
     html = replay.write_replay(str(tmp_path / "r.html"), replay.replay_data(f, rep, source="test"))
     errors = []
-    with pw.sync_playwright() as p:
-        b = p.chromium.launch()
-        pg = b.new_page()
-        pg.on("pageerror", lambda e: errors.append(str(e)))
-        pg.goto("file://" + html)
-        pg.wait_for_function("window.REPLAY !== undefined", timeout=20000)
-        pg.evaluate("REPLAY.renderAt(REPLAY.duration)")
-        b.close()
+    try:
+        with chromium_browser() as b:
+            pg = b.new_page()
+            pg.on("pageerror", lambda e: errors.append(str(e)))
+            pg.goto(file_url(html))
+            pg.wait_for_function("window.REPLAY !== undefined", timeout=20000)
+            pg.evaluate("REPLAY.renderAt(REPLAY.duration)")
+    except BrowserUnavailable as e:
+        if os.environ.get("CBT_REQUIRE_BROWSER"):
+            raise
+        pytest.skip(str(e))
     assert not errors, errors
 
 

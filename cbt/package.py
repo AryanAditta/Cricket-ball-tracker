@@ -23,6 +23,8 @@ from PIL import Image, ImageDraw
 
 from .footage import _font, COL, _verdict_colour, final_banner
 from .media import ffmpeg_exe
+from .browser import BrowserUnavailable, chromium_browser, file_url
+from .lbw import decision_rows
 
 W, H, FPS = 1920, 1080, 30
 NAVY = (10, 22, 36)
@@ -44,13 +46,16 @@ def _label(text, sub=None):
     d.text((W / 2, y + 28), text, font=f, fill=(255, 255, 255), anchor="mm")
     if sub:
         d.text((W / 2, y + 60), sub, font=fs, fill=(200, 212, 224), anchor="mm")
-    a = np.array(img).astype(np.float32)
-    return a[..., :3][..., ::-1].copy(), a[..., 3:] / 255.0
+    left, top, right, bottom = img.getbbox()
+    rgba = np.asarray(img.crop((left, top, right, bottom)), dtype=np.float32)
+    return (slice(top, bottom), slice(left, right)), rgba[..., :3][..., ::-1], rgba[..., 3:] / 255
 
 
 def _apply(frame, lab):
-    rgb, al = lab
-    return (frame.astype(np.float32) * (1 - al) + rgb * al).astype(np.uint8)
+    area, rgb, alpha = lab
+    out = frame.copy()
+    out[area] = frame[area] * (1 - alpha) + rgb * alpha
+    return out
 
 
 def title_card(rep, path):
@@ -102,6 +107,25 @@ def decision_card(rep, path):
     return path
 
 
+def evidence_card(rep, path):
+    img = Image.new("RGB", (W, H), NAVY)
+    d = ImageDraw.Draw(img)
+    d.text((112, 88), "DECISION MEASUREMENTS", font=_font(66), fill=(255, 255, 255))
+    d.text((116, 179), "Positive sideways values are towards off.",
+           font=_font(26, bold=False), fill=(162, 186, 208))
+    columns = (116, 785, 1115)
+    for x, label in zip(columns, ("MEASUREMENT", "VALUE", "RULE BOUNDARY")):
+        d.text((x, 252), label, font=_font(25), fill=(162, 186, 208))
+    for i, values in enumerate(decision_rows(rep)):
+        y = 305 + 78 * i
+        d.rounded_rectangle((92, y, 1828, y + 65), 10, fill=(21, 40, 57))
+        for x, value in zip(columns, values):
+            d.text((x, y + 32), value, font=_font(29, bold=x == columns[1]),
+                   fill=(245, 249, 253), anchor="lm")
+    img.save(path)
+    return path
+
+
 # ---------------------------------------------------------------- video writer
 class Writer:
     def __init__(self, path):
@@ -120,9 +144,13 @@ class Writer:
         return img
 
     def hold(self, img, seconds, lab=None):
-        out = None
-        for _ in range(int(round(seconds * FPS))):
-            out = self.frame(img, lab)
+        frames = int(round(seconds * FPS))
+        if frames <= 0:
+            return None
+        out = self.frame(img, lab)
+        for _ in range(frames - 1):
+            self.vw.write(out)
+        self.n += frames - 1
         return out
 
     def video(self, path, lab=None, fps_in=None, start=0, stop=None, every=1):
@@ -149,73 +177,37 @@ class Writer:
 
 # ---------------------------------------------------------------- 3D angles
 def render_angles(replay_html, outdir, size=(1280, 720), log=print):
-    """Render the 3D replay from several camera presets (needs playwright +
-    chromium). The main view covers the whole replay; the other angles the
-    flight and projection only."""
-    from playwright.sync_api import sync_playwright
-    with sync_playwright() as p:
-        b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
-        pg = b.new_page()
-        pg.goto("file://" + os.path.abspath(replay_html) + "?capture")
-        pg.wait_for_function("window.REPLAY !== undefined")
-        pg.evaluate("REPLAY.setSpeed(0.25)")
-        tl = pg.evaluate("REPLAY.timeline")
-        b.close()
+    """Render every angle and the pitch map from a single loaded scene."""
+    args = ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
     out = {}
-    for cam, title, part in ANGLES:
-        path = os.path.join(outdir, f"angle_{cam}.mp4")
-        log(f"rendering 3D replay: {title.lower()}")
-        if part == "seg":
-            # from just before the bounce to the decision panels
-            _render_part(replay_html, path, size, cam, tl["t1"] + 0.4 * (tl["t2"] - tl["t1"]), tl["t5"] + 0.8)
-        else:
-            # whole delivery up to the decision (the long hold at the end is added as a still)
-            _render_part(replay_html, path, size, cam, 0.0, min(tl["end"], tl["t5"] + 1.5))
-        out[cam] = path
-    still = os.path.join(outdir, "pitch_map.png")
-    _still(replay_html, still, size, "top", tl["end"])
-    out["pitch_map"] = still
+    with chromium_browser(args) as browser:
+        page = browser.new_page(viewport={"width": size[0], "height": size[1]}, device_scale_factor=1)
+        page.goto(file_url(replay_html, capture=True))
+        page.wait_for_function("window.REPLAY !== undefined")
+        page.evaluate("REPLAY.setSpeed(0.25)")
+        tl = page.evaluate("REPLAY.timeline")
+        for cam, title, part in ANGLES:
+            path = os.path.join(outdir, f"angle_{cam}.mp4")
+            log(f"rendering 3D replay: {title.lower()}")
+            t0 = tl["t1"] + 0.4 * (tl["t2"] - tl["t1"]) if part == "seg" else 0.0
+            t1 = tl["t5"] + 0.8 if part == "seg" else min(tl["end"], tl["t5"] + 1.5)
+            page.evaluate("(cam) => REPLAY.setCam(cam)", cam)
+            _render_part(page, path, t0, t1)
+            out[cam] = path
+        still = os.path.join(outdir, "pitch_map.png")
+        page.evaluate("(t) => { REPLAY.setCam('top'); REPLAY.renderAt(t); }", tl["end"])
+        page.screenshot(path=still)
+        out["pitch_map"] = still
     return out, tl
 
 
-def _render_part(html, mp4, size, cam, t0, t1):
-    from playwright.sync_api import sync_playwright
-    with sync_playwright() as p:
-        b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
-        pg = b.new_page(viewport={"width": size[0], "height": size[1]}, device_scale_factor=1)
-        pg.goto("file://" + os.path.abspath(html) + "?capture")
-        pg.wait_for_function("window.REPLAY !== undefined")
-        pg.evaluate("REPLAY.setSpeed(0.25)")
-        pg.evaluate(f"REPLAY.setCam('{cam}')")
-        ff = subprocess.Popen([ffmpeg_exe(), "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate",
-                               str(FPS), "-i", "-", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "18",
-                               mp4], stdin=subprocess.PIPE)
-        for k in range(int((t1 - t0) * FPS) + 1):
-            pg.evaluate(f"REPLAY.renderAt({t0 + k / FPS})")
-            ff.stdin.write(pg.screenshot(type="jpeg", quality=92))
-        ff.stdin.close()
-        ff.wait()
-        b.close()
-    return mp4
-
-
-def _still(html, png, size, cam, t):
-    from playwright.sync_api import sync_playwright
-    with sync_playwright() as p:
-        b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
-        pg = b.new_page(viewport={"width": size[0], "height": size[1]}, device_scale_factor=1)
-        pg.goto("file://" + os.path.abspath(html) + "?capture")
-        pg.wait_for_function("window.REPLAY !== undefined")
-        pg.evaluate("REPLAY.setSpeed(0.25)")
-        pg.evaluate(f"REPLAY.setCam('{cam}')")
-        pg.evaluate(f"REPLAY.renderAt({t})")
-        pg.screenshot(path=png)
-        b.close()
-    return png
+def _render_part(page, mp4, t0, t1):
+    from .replay import encode_frames
+    encode_frames(page, mp4, FPS, t0, int((t1 - t0) * FPS) + 1)
 
 
 # ---------------------------------------------------------------- package
-def build_package(res, outdir, log=print, angles=True):
+def build_package(res, outdir, log=print, angles=True, angle_height=720):
     """res: the dict returned by broadcast_run.process (outputs already in outdir)."""
     from .broadcast import read_frames
     rep, video, shot = res["report"], res["video"], res["shot"]
@@ -226,16 +218,17 @@ def build_package(res, outdir, log=print, angles=True):
         ang = {}
         if angles:
             try:
-                ang, _ = render_angles(os.path.join(outdir, "replay.html"), work, log=log)
-            except ImportError:
-                log("3D angles skipped: pip install playwright && python -m playwright install chromium")
+                ang, _ = render_angles(os.path.join(outdir, "replay.html"), work,
+                                       size=(2 * round(angle_height * 8 / 9), angle_height), log=log)
+            except BrowserUnavailable as exc:
+                log(f"3D angles skipped: {exc}")
         title = title_card(rep, os.path.join(pics, "00_title.png"))
         verdict = decision_card(rep, os.path.join(pics, "90_decision.png"))
         pkg = Writer(os.path.join(outdir, "DRS_package.mp4"))
         log("assembling DRS_package.mp4")
         pkg.hold(cv2.imread(title), 2.5)
         # the delivery as broadcast
-        lab = _label("THE DELIVERY", "broadcast replay")
+        lab = _label("THE DELIVERY", "stabilized broadcast replay" if rep.get("stabilized") else "broadcast replay")
         last_sample = res["samples"][-1]["f1"]
         end = min(shot[1], last_sample + 25)
         first = None
@@ -269,6 +262,8 @@ def build_package(res, outdir, log=print, angles=True):
             pm = cv2.imread(ang["pitch_map"])
             out = pkg.hold(pm, 3.0, _label("PITCH MAP", f"pitched {rep['bounce_xy_m'][1]:.2f} m from the stumps"))
             cv2.imwrite(os.path.join(pics, "20_pitch_map.jpg"), out)
+        data_card = evidence_card(rep, os.path.join(pics, "89_decision_measurements.png"))
+        pkg.hold(cv2.imread(data_card), 5.0)
         pkg.hold(cv2.imread(verdict), 4.0)
         pkg.close()
         for f in ("calibration_check.jpg", "delivery.png"):

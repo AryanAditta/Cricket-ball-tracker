@@ -5,11 +5,13 @@ scrubber (release / bounce / impact markers), the 3D replay, the LBW protocol
 walked through step by step (with the pitched-outside-leg fast path), the
 review outcome, and a review log that can be exported to CSV.
 """
-import json
 import os
 import shutil
 
 from .media import ffmpeg_exe, to_webm
+
+from .replay import json_data
+from .lbw import browser_decisions, decision_rows
 
 HERE = os.path.dirname(__file__)
 
@@ -35,12 +37,13 @@ def build_console(outdir, video_meta, fit, rep, replay_name="replay.html", deliv
             shutil.copy(m["src"], dst)
         vids.append(dict(m, src=os.path.relpath(dst, outdir).replace(os.sep, "/")))
     data = dict(
-        delivery=delivery, meta=dict(source=source), replay=replay_name, report=rep, videos=vids,
+        delivery=delivery, meta=dict(source=source), replay=replay_name, report=rep, decision_data=decision_rows(rep), videos=vids,
         times=times or dict(release=float(fit.t_first), bounce=float(fit.tb), impact=float(fit.t_last)),
     )
     with open(os.path.join(HERE, "console_template.html"), encoding="utf-8") as f:
         html = f.read()
-    blob = json.dumps(data, default=lambda o: o.item() if hasattr(o, "item") else str(o))
+    blob = json_data(data)
+    html = html.replace("/*__DECISIONS__*/", browser_decisions(), 1)
     html = html.replace("__DATA__", blob.replace("</", "<\\/"), 1)
     path = os.path.join(outdir, name)
     with open(path, "w", encoding="utf-8") as f:

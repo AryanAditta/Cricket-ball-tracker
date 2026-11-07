@@ -147,7 +147,7 @@ def _panels(img, rep, show, u, title, sub):
         d.text((W / 2, by + 46 * u), big, font=_font(int(56 * u)), fill=WHITE, anchor="mm")
         d.text((W / 2, by + 94 * u), small.upper(), font=_font(int(17 * u)), fill=WHITE, anchor="mm")
         c = rep["wickets_confidence"]
-        conf = (f"tracking confidence: hitting {100 * c['hitting']:.0f}% · umpire's call "
+        conf = (f"sampled paths: hitting {100 * c['hitting']:.0f}% · umpire's call "
                 f"{100 * c['umpires call']:.0f}% · missing {100 * c['missing']:.0f}% · "
                 f"±{200 * rep['stumps_sigma_m'][0]:.1f} cm sideways at the stumps"
                 + (" · LOW CONFIDENCE" if rep.get("low_confidence") else ""))

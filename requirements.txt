@@ -1,12 +1,7 @@
-numpy
-scipy
-opencv-python
-matplotlib
-pillow
-imageio-ffmpeg
-# optional: trained detector
-# ultralytics
-# optional: render replay videos from the command line
-# playwright
-# tests
-pytest
+numpy==2.5.4
+scipy==1.18.1
+opencv-python==4.11.0.86
+matplotlib==3.11.2
+pillow==13.0.0
+imageio-ffmpeg==0.8.1
+pytest==9.1.1

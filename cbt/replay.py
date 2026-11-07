@@ -10,11 +10,15 @@ panels and the final decision. It can record itself to video from the browser.
 (pip install playwright && python -m playwright install chromium) + ffmpeg.
 """
 import json
+import math
 import os
 import subprocess
 import numpy as np
 
 from .pitch import BALL_RADIUS, STUMP_RADIUS
+from .browser import chromium_browser, file_url
+
+from .lbw import browser_decisions
 
 HERE = os.path.dirname(__file__)
 
@@ -54,6 +58,21 @@ def replay_data(fit, rep, truth=None, handed="right", source="", badge=""):
     return d
 
 
+def json_data(data):
+    """Encode nonfinite diagnostics as null so offline HTML can always load."""
+    def clean(value):
+        if isinstance(value, dict):
+            return {key: clean(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [clean(item) for item in value]
+        if isinstance(value, np.generic):
+            return clean(value.item())
+        if isinstance(value, float) and not math.isfinite(value):
+            return None
+        return value
+    return json.dumps(clean(data), allow_nan=False)
+
+
 def write_replay(path, data):
     with open(os.path.join(HERE, "replay_template.html"), encoding="utf-8") as f:
         html = f.read()
@@ -61,7 +80,8 @@ def write_replay(path, data):
         three = f.read()
     with open(os.path.join(HERE, "vendor", "OrbitControls.js"), encoding="utf-8") as f:
         orbit = f.read()
-    blob = json.dumps(data, default=lambda o: o.item() if hasattr(o, "item") else str(o))
+    blob = json_data(data)
+    html = html.replace("/*__DECISIONS__*/", browser_decisions(), 1)
     blob = blob.replace("</", "<\\/")
     # use plain replace (no regex) so nothing inside the JS gets interpreted
     html = html.replace("/*__THREE__*/", three.replace("</script", "<\\/script"), 1)
@@ -78,32 +98,39 @@ def render_video(html_path, mp4_path, fps=30, size=(1920, 1080), speed=0.25, sti
     speed). `still=t` writes a single PNG at replay time t instead. cam: a
     camera preset (auto, broadcast, umpire, side, stumps, top); t_from skips
     the start of the timeline."""
-    from playwright.sync_api import sync_playwright
-    url = "file://" + os.path.abspath(html_path) + "?capture"
-    with sync_playwright() as p:
-        b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader",
-                                    "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
-        pg = b.new_page(viewport={"width": size[0], "height": size[1]}, device_scale_factor=1)
-        pg.goto(url)
+    args = ["--use-gl=angle", "--use-angle=swiftshader",
+            "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
+    with chromium_browser(args) as browser:
+        pg = browser.new_page(viewport={"width": size[0], "height": size[1]}, device_scale_factor=1)
+        pg.goto(file_url(html_path, capture=True))
         pg.wait_for_function("window.REPLAY !== undefined")
-        pg.evaluate(f"REPLAY.setSpeed({speed})")
-        pg.evaluate(f"REPLAY.setCam('{cam}')")
+        pg.evaluate("(speed) => REPLAY.setSpeed(speed)", speed)
+        pg.evaluate("(cam) => REPLAY.setCam(cam)", cam)
         if still is not None:
-            pg.evaluate(f"REPLAY.renderAt({still})")
+            pg.evaluate("(t) => REPLAY.renderAt(t)", still)
             pg.screenshot(path=mp4_path)
-            b.close()
-            return mp4_path
-        dur = pg.evaluate("REPLAY.duration")
-        n = int((dur - t_from) * fps) + 1
-        from .media import ffmpeg_exe
-        ff = subprocess.Popen([ffmpeg_exe(), "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate",
-                               str(fps), "-i", "-", "-c:v", "libx264", "-pix_fmt", "yuv420p",
-                               "-crf", "18", "-movflags", "+faststart", mp4_path],
-                              stdin=subprocess.PIPE)
-        for k in range(n):
-            pg.evaluate(f"REPLAY.renderAt({t_from + k / fps})")
-            ff.stdin.write(pg.screenshot(type="png"))
-        ff.stdin.close()
-        ff.wait()
-        b.close()
+        else:
+            dur = pg.evaluate("REPLAY.duration")
+            encode_frames(pg, mp4_path, fps, t_from, int((dur - t_from) * fps) + 1)
     return mp4_path
+
+
+def encode_frames(page, path, fps, start, count):
+    from .media import ffmpeg_exe
+    exe = ffmpeg_exe()
+    if not exe:
+        raise RuntimeError("FFmpeg is needed for replay video exports")
+    cmd = [exe, "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(fps),
+           "-i", "-", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+           "-crf", "18", "-movflags", "+faststart", path]
+    with subprocess.Popen(cmd, stdin=subprocess.PIPE) as encoder:
+        try:
+            for frame in range(count):
+                page.evaluate("(t) => REPLAY.renderAt(t)", start + frame / fps)
+                encoder.stdin.write(page.screenshot(type="jpeg", quality=88))
+            encoder.stdin.close()
+        except BaseException:
+            encoder.kill()
+            raise
+        if encoder.wait():
+            raise subprocess.CalledProcessError(encoder.returncode, cmd)

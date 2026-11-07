@@ -24,6 +24,10 @@ Rules implemented (as published for ICC DRS; see README for sources):
 CHECK THESE AGAINST THE PLAYING CONDITIONS BCB USES before match use: they
 are set per competition and change over time.
 """
+import itertools
+import json
+from functools import lru_cache
+
 import numpy as np
 from .pitch import STUMP_HALF_WIDTH, STUMP_HEIGHT, BALL_RADIUS
 
@@ -109,6 +113,60 @@ def decide(pitching, impact, wickets, on_field="not out", shot_offered=True, dis
     if dist_rule:
         return res(stands, True, f"umpire's call ({dist_rule} rule)")
     return res("out", False, "LBW")
+
+
+@lru_cache(maxsize=1)
+def browser_decisions():
+    """Export the finite decision table for offline replay and console controls."""
+    cases = itertools.product(
+        ("in line", "outside off", "outside leg"),
+        ("in line", "umpires call", "outside off", "outside leg"),
+        ("hitting", "umpires call", "missing", "inconclusive"),
+        ("out", "not out"), (True, False), (None, "3m", "2.5m/40cm"),
+    )
+    table = {}
+    for case in cases:
+        result = decide(*case)
+        table[json.dumps(case, separators=(",", ":"))] = (
+            result["decision"], result["umpires_call"], result["reason"])
+    return "const LBW_TABLE = " + json.dumps(table, separators=(",", ":")) + """
+function decide(p, i, w, onField, shot, distance) {
+  const [decision, umpiresCall, reason] =
+    LBW_TABLE[JSON.stringify([p, i, w, onField === "out" ? "out" : "not out",
+                             Boolean(shot), distance || null])];
+  return {decision, umpiresCall, reason};
+}
+function reviewDecision(report, onField, shot) {
+  if (report.status && report.status !== "ok") {
+    return decide("in line", "in line", "inconclusive", onField, shot, null);
+  }
+  return decide(report.pitching, report.impact, report.wickets, onField, shot, report.distance_rule);
+}
+"""
+
+
+def decision_rows(rep):
+    """Measurements and rule boundaries displayed together in each review."""
+    def cm(v, signed=False):
+        if v is None or not np.isfinite(v):
+            return "Unavailable"
+        return f"{100 * v:+.1f} cm" if signed else f"{100 * v:.1f} cm"
+
+    handed = rep["handed"]
+    bx = _off(rep["bounce_xy_m"][0], handed)
+    ix = _off(rep["impact_xyz_m"][0], handed)
+    sx, sz = rep["stumps_xz_m"]
+    edge = np.hypot(max(abs(sx) - ZONE_HALF_WIDTH, 0), max(-sz, sz - ZONE_TOP, 0))
+    return [
+        ("Pitching line", cm(bx, True), f"Leg line −{cm(ZONE_HALF_WIDTH)}"),
+        ("Impact line", cm(ix, True), f"±{cm(ZONE_HALF_WIDTH)} in line · {cm(R)} clipping band"),
+        ("Impact height", cm(rep["impact_xyz_m"][2]), "Recorded measurement"),
+        ("Wicket centre across", cm(_off(sx, handed), True), f"Zone ±{cm(ZONE_HALF_WIDTH)}"),
+        ("Wicket centre height", cm(sz), f"Zone top {cm(ZONE_TOP)}"),
+        ("Centre to wicket zone", cm(edge), f"Ball radius {cm(R)}"),
+        ("Impact to stumps", f"{rep['impact_to_stumps_m']:.2f} m", f"Distance rules at {DIST_MID:g} m / {DIST_FAR:g} m"),
+        ("Pitch to impact", f"{rep['pitch_to_impact_m']:.2f} m", f"Short distance threshold {cm(PITCH_TO_IMPACT_MIN)}"),
+    ]
 
 
 def review_outcome(on_field, final, umpires_call, reviewed_by):

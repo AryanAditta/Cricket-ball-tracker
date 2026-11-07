@@ -30,35 +30,73 @@ def load_clicks(path):
     return d
 
 
-def candidates_for_shot(video, shot, cam, bg, log=print):
+def candidates_for_shot(video, shot, cam, bg, log=print, ball="red", weights=None):
     import cv2
     a, b = shot
     roi = bc.corridor_roi(cam, bg.shape)
     # ball size mid-pitch (it varies ~1.5x end to end; the blob filter tolerates that)
     mid = cam.project(np.array([[0.0, 10.0, 0.8]]))
     r_px = float(np.clip(bc.expected_radius_px(cam, mid)[0], 2.5, 25))
-    bg_w = bc.warmth(bg)
+    bg_w = bc.warmth(bg) if ball == "red" and not weights else None
     bg_g = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    detector = None
+    if weights:
+        from .detect import YoloDetector
+        detector = YoloDetector(weights)
+    h, w = roi.shape
     cands = {}
     for i, fr in bc.read_frames(video, range(a, b + 1)):
-        cands[i] = bc.ball_candidates(fr, bg, roi, r_px, bg_warm=bg_w, bg_gray=bg_g)
+        if detector is None:
+            cands[i] = bc.ball_candidates(fr, bg, roi, r_px, ball=ball, bg_warm=bg_w, bg_gray=bg_g)
+        else:
+            rows = [(u, v, 100 * confidence) for u, v, confidence in detector(fr)
+                    if 0 <= u < w and 0 <= v < h and roi[int(v), int(u)]]
+            cands[i] = np.asarray(rows, float).reshape(-1, 3)
     log(f"ball candidates: frames {a}-{b}, expected ball radius {r_px:.1f}px")
     return cands
 
 
 def process(video, clicks, outdir, handed="right", bowler=None, speed_kmh=None, on_field="not out",
-            shot_offered=True, shot=None, title="BALL TRACKING · ADRS", render_video=True, log=print):
+            shot_offered=True, shot=None, title="BALL TRACKING · ADRS", render_video=True, log=print,
+            ball="red", weights=None, stabilize=False, speed_roi=None, on_result=None):
     import cv2
     os.makedirs(outdir, exist_ok=True)
     cl = load_clicks(clicks) if isinstance(clicks, str) else dict(clicks or {})
-    shot = tuple(cl.get("shot") or shot or ()) or None
+    source = os.path.basename(video)
+    shot = tuple(shot or cl.get("shot") or ()) or None
+    if stabilize and (cl.get("points") or cl.get("foot")):
+        raise ValueError("Clicks use original video coordinates. Mark the stabilized video in clicktool instead.")
     sc = bc.scan(video)
     if shot is None:
-        shot, _ = bc.pick_replay_shot(video, sc)
+        shot, _ = bc.pick_replay_shot(video, sc, allow_motion=stabilize)
         log(f"replay shot picked automatically: frames {shot[0]}-{shot[1]} "
             "(pass the shot in clicks.json if this is wrong)")
     else:
         log(f"replay shot: frames {shot[0]}-{shot[1]}")
+    if len(shot) != 2 or not 0 <= shot[0] <= shot[1] < len(sc["diffs"]) or shot[1] - shot[0] < 5:
+        raise ValueError("Choose at least six consecutive frames inside the video")
+    original_shot = shot
+    speed_suggestion = None
+    if speed_roi is not None:
+        from .speed_ocr import suggest_speed
+        try:
+            speed_suggestion = suggest_speed(video, shot, speed_roi)
+        except (RuntimeError, ValueError) as exc:
+            log(str(exc))
+        if speed_suggestion is not None:
+            log(f"Speed graphic suggests {speed_suggestion:g} km/h. Confirm before using --speed-kmh.")
+        else:
+            log("No consistent speed-gun reading found in the selected region.")
+    if stabilize:
+        from .stabilize import stabilize_shot
+        if any(shot[0] < cut <= shot[1] for cut in sc["cuts"]):
+            raise ValueError("Stabilization needs one continuous replay shot. Select it with --shot.")
+        corrected = os.path.join(outdir, "stabilized_input.mp4")
+        stabilize_shot(video, shot, corrected)
+        video = corrected
+        shot = (0, original_shot[1] - original_shot[0])
+        sc = bc.scan(video)
+        log(f"stabilized replay written to {corrected}")
     bg = bc.background(video, shot)
 
     # 1. calibration: clicked crease corners, or found automatically
@@ -86,7 +124,7 @@ def process(video, clicks, outdir, handed="right", bowler=None, speed_kmh=None, 
         log("WARNING: calibration residual is high -- check calibration_check.jpg and the clicks")
 
     # 2. ball
-    cands = candidates_for_shot(video, shot, cam, bg, log)
+    cands = candidates_for_shot(video, shot, cam, bg, log, ball=ball, weights=weights)
     held = sc["held"]
     track = bc.track_delivery(cands, held, cam=cam, shape=bg.shape)
     if len(track) < 6:
@@ -115,8 +153,17 @@ def process(video, clicks, outdir, handed="right", bowler=None, speed_kmh=None, 
         else:
             log("NOTE: front foot not found -- the impact point is only constrained by the last "
                 "ball position seen; mark it with the click tool for a firmer result")
-    rep = fit.report(handed=handed, on_field=on_field, shot_offered=shot_offered)
-    rep.update(source=os.path.basename(video), shot_frames=list(map(int, shot)),
+    extra_problems = ()
+    if stabilize and foot is None:
+        extra_problems = ("stabilized replay needs a front-foot mark to anchor impact depth",)
+        log("Mark the front foot on stabilized_input.mp4 with clicktool and analyse that clip directly.")
+    rep = fit.report(handed=handed, on_field=on_field, shot_offered=shot_offered,
+                     extra_problems=extra_problems)
+    rep.update(source=source, shot_frames=list(map(int, original_shot)),
+               track_frame_offset=original_shot[0] if stabilize else 0,
+               stabilized=bool(stabilize), ball_colour=ball,
+               detector="YOLO" if weights else "foreground",
+               speed_gun_kmh=speed_kmh or cl.get("speed_kmh"), speed_ocr_suggestion_kmh=speed_suggestion,
                calibration=dict(rms_px=round(info["rms_px"], 2), focal_px=round(info["focal_px"]),
                                 camera_position_m=info["camera_position_m"]),
                front_foot_px=foot, front_foot=foot_how, calibration_source=how)
@@ -125,8 +172,10 @@ def process(video, clicks, outdir, handed="right", bowler=None, speed_kmh=None, 
     inl = fit.inlier
     samples = [smp for smp, k in zip(samples, inl) if k]
     s_used = s_used[inl]
-    with open(os.path.join(outdir, "report.json"), "w") as f:
+    with open(os.path.join(outdir, "report.json"), "w", encoding="utf-8") as f:
         json.dump(rep, f, indent=2, default=lambda o: o.tolist() if hasattr(o, "tolist") else str(o))
+    if on_result is not None:
+        on_result(rep)
     bc.save_json(os.path.join(outdir, "track.json"),
                  dict(samples=samples, s=s_used, camera=dict(K=cam.K, R=cam.R, t=cam.t, size=cam.size)))
     from .camera import save_cameras
@@ -135,8 +184,8 @@ def process(video, clicks, outdir, handed="right", bowler=None, speed_kmh=None, 
     # 4. outputs
     from . import viz, replay
     viz.figure(fit, rep=rep, path=os.path.join(outdir, "delivery.png"),
-               title=f"{os.path.basename(video)} · single camera")
-    src = f"{os.path.basename(video)} · single camera, broadcast replay"
+               title=f"{source} · single camera")
+    src = f"{source} · single camera, " + ("stabilized replay" if stabilize else "broadcast replay")
     html = replay.write_replay(os.path.join(outdir, "replay.html"),
                                replay.replay_data(fit, rep, handed=handed, source=src))
     out_mp4 = os.path.join(outdir, "tracked_footage.mp4")
@@ -149,8 +198,8 @@ def process(video, clicks, outdir, handed="right", bowler=None, speed_kmh=None, 
                      impact=(samples[-1]["f0"] - a) / fps)
         from .console import build_console
         build_console(outdir, [dict(name="broadcast", src=out_mp4, t0=0.0, fps=fps, rate=1.0)], fit, rep,
-                      replay_name="replay.html", delivery=os.path.splitext(os.path.basename(video))[0],
-                      source="broadcast footage, single camera", times=times)
+                      replay_name="replay.html", delivery=os.path.splitext(source)[0],
+                      source=src, times=times)
     return dict(fit=fit, report=rep, camera=cam, calibration=info, samples=samples, s=s_used,
                 shot=shot, outdir=outdir, background=bg, video=video, used=used)
 

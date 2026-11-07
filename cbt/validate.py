@@ -39,11 +39,13 @@ def _f(row, k):
 def score(truth_rows, reports):
     """truth_rows: dicts from truth.csv; reports: {delivery: report dict}."""
     rows, pitch_err, speed_err, agree, decided, marginal = [], [], [], 0, 0, 0
-    tracked = 0
+    tracked = speed_measured = 0
     for t in truth_rows:
         d = t["delivery"]
         rep = reports.get(d)
         row = dict(delivery=d, tracked=0)
+        spd = _f(t, "speed_kmh")
+        speed_measured += spd is not None
         if rep is None:
             row["note"] = "no report (not tracked)"
             rows.append(row)
@@ -53,7 +55,7 @@ def score(truth_rows, reports):
         row["tracked"] = int(ok)
         row["status"] = rep.get("status", "ok")
         px, py = _f(t, "pitch_x"), _f(t, "pitch_y")
-        if px is not None and py is not None:
+        if ok and px is not None and py is not None:
             bx, by = rep["bounce_xy_m"]
             e = float(np.hypot(bx - px, by - py)) * 100
             row.update(pitch_err_cm=round(e, 2), pitch_err_x_cm=round((bx - px) * 100, 2),
@@ -62,16 +64,28 @@ def score(truth_rows, reports):
             handed = (t.get("handed") or "right").strip()
             row["pitching_truth"] = lbw.pitching(px, handed)
             row["pitching_ours"] = rep["pitching"]
-        spd = _f(t, "speed_kmh")
         if spd is not None:
-            se = abs(rep["release_speed_kmh"] - spd)
-            row["speed_err_kmh"] = round(se, 2)
-            speed_err.append(se)
+            speed = rep.get("release_speed_kmh")
+            row["speed_source"] = "timestamped"
+            if speed is None or not np.isfinite(speed):
+                speed = rep.get("speed_estimate_kmh")
+                row["speed_source"] = "estimated"
+            if ok and rep.get("speed_gun_kmh") is not None and row["speed_source"] == "estimated":
+                row["speed_source"] = "speed-gun assisted"
+            elif ok and speed is not None and np.isfinite(speed):
+                se = abs(speed - spd)
+                row["speed_err_kmh"] = round(se, 2)
+                speed_err.append(se)
+            else:
+                row["speed_source"] = "unavailable"
         hit = (t.get("stumps_result") or "").strip().lower()
         if hit in ("hit", "miss"):
             ours = rep["wickets"]
             row["stumps_truth"], row["wickets_ours"] = hit, ours
-            if ours in ("umpires call", "inconclusive"):
+            p_miss = rep.get("wickets_confidence", {}).get("missing")
+            if ok and p_miss is not None and 0 <= p_miss <= 1:
+                row["predicted_miss"] = p_miss
+            if not ok or ours in ("umpires call", "inconclusive"):
                 marginal += 1                # not an error, but not a decision either
                 row["wickets_ok"] = "marginal"
             else:
@@ -92,6 +106,7 @@ def score(truth_rows, reports):
         wickets_decided=decided, wickets_marginal=marginal,
         wickets_agree_pct=100 * agree / decided if decided else float("nan"),
         speed_err_median_kmh=_pct(speed_err, 50), speed_err_p95_kmh=_pct(speed_err, 95),
+        speed_scored=len(speed_err), speed_measured=speed_measured,
     )
     return summary, rows
 
@@ -149,7 +164,8 @@ def write_report(path, summary, rows, proj=None, targets=TARGETS, title="Validat
          f"| Wickets call agrees (decided balls) | {summary['wickets_agree_pct']:.1f}% "
          f"({summary['wickets_decided']} decided, {summary['wickets_marginal']} umpire's call / inconclusive) | "
          f"≥ {targets['wickets_agree_pct']}% | {chk(summary['wickets_agree_pct'], targets['wickets_agree_pct'], False)} |",
-         f"| Release speed error, 95th pct | {summary['speed_err_p95_kmh']:.1f} km/h | ≤ {targets['speed_err_p95_kmh']} km/h | "
+         f"| Release speed error, 95th pct | {summary['speed_err_p95_kmh']:.1f} km/h "
+         f"({summary['speed_scored']}/{summary['speed_measured']} scored) | ≤ {targets['speed_err_p95_kmh']} km/h | "
          f"{chk(summary['speed_err_p95_kmh'], targets['speed_err_p95_kmh'])} |"]
     if proj:
         errs = np.array([p["err_cm"] for p in proj])
@@ -161,6 +177,20 @@ def write_report(path, summary, rows, proj=None, targets=TARGETS, title="Validat
             e = [p["err_cm"] for p in proj if p["cut_m"] == c]
             same = np.mean([p["same_call"] for p in proj if p["cut_m"] == c]) * 100
             L.append(f"| {c:.1f} m | {len(e)} | {_pct(e, 50):.1f} cm | {_pct(e, 95):.1f} cm | {same:.0f}% |")
+    predictions = [(r["predicted_miss"], r["stumps_truth"] == "miss")
+                   for r in rows if "predicted_miss" in r]
+    if predictions:
+        brier = np.mean([(p - miss) ** 2 for p, miss in predictions])
+        L += ["", f"### Wicket miss probability ({len(predictions)} usable deliveries)",
+              "", f"Brier score: {brier:.3f} (lower is better). Small groups are descriptive.",
+              "", "| Predicted band | Deliveries | Mean prediction | Observed misses |",
+              "|---|---:|---:|---:|"]
+        for i in range(5):
+            group = [(p, miss) for p, miss in predictions if min(int(5 * p), 4) == i]
+            if group:
+                ps, actual = zip(*group)
+                L.append(f"| {i*20}–{(i+1)*20}% | {len(group)} | "
+                         f"{np.mean(ps):.0%} | {np.mean(actual):.0%} |")
     bad = [r for r in rows if r.get("wickets_ok") == 0 or not r.get("tracked")]
     if bad:
         L += ["", "Deliveries to look at (untracked or wrong wickets call):", ""]

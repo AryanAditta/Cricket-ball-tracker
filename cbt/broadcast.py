@@ -64,6 +64,8 @@ def scan(path, cut_thresh=18.0, hold_thresh=0.6):
         diffs.append(0.0 if prev is None else float(np.mean(np.abs(g - prev))))
         prev = g
     diffs = np.array(diffs)
+    if not len(diffs):
+        raise RuntimeError(f"could not decode any frames from {path}")
     cuts = [i for i in range(1, len(diffs)) if diffs[i] > cut_thresh]
     bounds = [0] + cuts + [len(diffs)]
     shots = [(a, b - 1) for a, b in zip(bounds[:-1], bounds[1:]) if b - a >= 5]
@@ -99,7 +101,7 @@ def pitch_fraction(img):
     return float(tan.mean())
 
 
-def pick_replay_shot(path, sc):
+def pick_replay_shot(path, sc, allow_motion=False):
     """Default shot to analyse: a locked-off shot (camera not moving) with the
     most pitch in view. Returns (shot, info). The click tool lets the operator
     choose another shot."""
@@ -110,7 +112,9 @@ def pick_replay_shot(path, sc):
         rows.append(dict(shot=s, frames=b - a + 1, motion_px=round(camera_motion(path, s), 2),
                          pitch_fraction=round(pitch_fraction(mid), 3),
                          held_fraction=round(float(np.mean(sc["held"][a + 1:b + 1])) if b > a else 0.0, 3)))
-    pool = [r for r in rows if r["motion_px"] < 3.0 and r["frames"] >= 20] or rows
+    if not rows:
+        raise RuntimeError("no continuous replay shot found")
+    pool = [r for r in rows if r["frames"] >= 20 and (allow_motion or r["motion_px"] < 3.0)] or rows
     best = max(pool, key=lambda r: r["pitch_fraction"])
     return best["shot"], dict(best, all_shots=rows)
 
@@ -579,7 +583,10 @@ def ball_candidates(frame, bg, roi, r_px, thresh=8.0, top=40, ball="red", bg_war
     if bg_gray is None:
         bg_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY).astype(np.float32)
     g = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).astype(np.float32)
-    D = np.clip(bg_gray - g, 0, None)
+    D = np.clip(g - bg_gray if ball == "white" else bg_gray - g, 0, None)
+    if ball == "white":
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        D *= (hsv[..., 1] < 70) & (g >= 155)
     if ball == "red":
         if bg_warm is None:
             bg_warm = warmth(bg)
@@ -589,7 +596,7 @@ def ball_candidates(frame, bg, roi, r_px, thresh=8.0, top=40, ball="red", bg_war
     S = _blob_filter(D, 0.7 * r_px)
     mx = cv2.dilate(S, np.ones((9, 9), np.uint8))
     ys, xs = np.where((S >= mx) & (S > thresh))
-    if not len(xs):
+    if not len(xs) or top <= 0:
         return np.zeros((0, 3))
     sc = S[ys, xs]
     # isolation: a ball in flight is surrounded by background; a shirt number,
@@ -604,7 +611,7 @@ def ball_candidates(frame, bg, roi, r_px, thresh=8.0, top=40, ball="red", bg_war
     ring = np.clip(ring, 0, 1)
     busy = cv2.filter2D(F, -1, ring / ring.sum())[ys, xs]
     sc = sc * (1.15 - busy)
-    o = np.argsort(-sc)[:top]
+    o = np.argsort(-sc)
     out = []
     for k in o:
         x, y = xs[k], ys[k]
@@ -612,9 +619,13 @@ def ball_candidates(frame, bg, roi, r_px, thresh=8.0, top=40, ball="red", bg_war
         win = D[max(0, y - w):y + w + 1, max(0, x - w):x + w + 1]
         if win.sum() > 0:
             yy, xx = np.mgrid[max(0, y - w):y + w + 1, max(0, x - w):x + w + 1]
-            out.append((float((xx * win).sum() / win.sum()), float((yy * win).sum() / win.sum()),
-                        float(sc[k])))
-    return np.array(out)
+            u, v = float((xx * win).sum() / win.sum()), float((yy * win).sum() / win.sum())
+            if ball == "white" and any((u - a) ** 2 + (v - b) ** 2 < 4 for a, b, _ in out):
+                continue
+            out.append((u, v, float(sc[k])))
+            if len(out) >= top:
+                break
+    return np.asarray(out, float).reshape(-1, 3)
 
 
 # ---------------------------------------------------------------- tracking

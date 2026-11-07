@@ -21,7 +21,7 @@
   .pill.bad { background: rgba(232,150,26,0.2); color: #ffc46b; }
   main { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(360px, 1fr); gap: 12px; padding: 12px; height: calc(100% - 50px); }
   section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; min-height: 0; }
-  .left { display: flex; flex-direction: column; gap: 10px; padding: 10px; }
+  .left { display: flex; flex-direction: column; gap: 10px; padding: 10px; overflow: auto; }
   .cams { display: grid; gap: 8px; flex: none; }
   .cam { position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16 / 9; }
   .cam video { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -35,7 +35,7 @@
   button:hover { border-color: rgba(255,255,255,0.3); }
   button.on { background: var(--accent); border-color: var(--accent); }
   .readout { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); }
-  .scrub { position: relative; height: 34px; }
+  .scrub { position: relative; flex: none; height: 48px; }
   .scrub input { width: 100%; margin: 0; position: absolute; top: 4px; accent-color: var(--blue); }
   .mark { position: absolute; top: 20px; transform: translateX(-50%); font-size: 11px; color: var(--muted);
     white-space: nowrap; cursor: pointer; }
@@ -64,6 +64,8 @@
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   th { color: var(--muted); font-weight: 600; }
+  .measurements td, .measurements th { white-space: normal; }
+  summary { cursor: pointer; font-weight: 700; }
   .quality { color: var(--muted); font-size: 12px; line-height: 1.5; }
   @media (max-width: 1100px) { main { grid-template-columns: 1fr; height: auto; } .cams { min-height: 50vh; } }
 </style>
@@ -107,11 +109,18 @@
     <div class="verdict" id="verdict"></div>
     <div class="actions">
       <button id="toReplay">Show on replay</button>
+      <button id="showData">Measurements</button>
       <button id="log">Log decision</button>
       <button id="export">Export log (CSV)</button>
       <button id="clear">Clear log</button>
     </div>
     <div class="quality" id="quality"></div>
+    <details id="measurementPanel" open>
+      <summary>Decision measurements</summary>
+      <p class="quality">Positive sideways values are towards off. Limits show the rules used for this review.</p>
+      <table class="measurements"><thead><tr><th scope="col">Measurement</th><th scope="col">Value</th><th scope="col">Rule boundary</th></tr></thead>
+      <tbody id="decisionData"></tbody></table>
+    </details>
     <div>
       <h2>Review log</h2>
       <table><thead><tr><th>Time</th><th>Delivery</th><th>By</th><th>On-field</th><th>P / I / W</th><th>Decision</th><th>Review</th></tr></thead>
@@ -129,18 +138,7 @@ const LABELS = { end_bowler: "Behind the bowler", end_striker: "Behind the strik
                  side_off: "Square · off side", side_leg: "Square · leg side" };
 
 // ---------------------------------------------------------------- LBW protocol (mirrors cbt/lbw.py)
-function decide(p, i, w, onField, shot, drule) {
-  const r = (d, uc, why) => ({ decision: d, umpiresCall: uc, reason: why });
-  if (p === "outside leg") return r("not out", false, "pitched outside leg");
-  if (i === "outside leg") return r("not out", false, "impact outside leg");
-  if (i === "outside off" && shot) return r("not out", false, "impact outside off, shot offered");
-  if (w === "missing") return r("not out", false, "missing the stumps");
-  if (w === "inconclusive") return r(onField, true, "insufficient tracking data");
-  if (i === "umpires call") return r(onField, true, "umpire's call on impact");
-  if (w === "umpires call") return r(onField, true, "umpire's call on wickets");
-  if (drule) return r(onField, true, `${drule} rule`);
-  return r("out", false, "LBW");
-}
+/*__DECISIONS__*/
 function reviewOutcome(onField, final, uc, by) {
   if (uc) return "umpire's call (review retained)";
   const wanted = by === "batting" ? "not out" : "out";
@@ -157,16 +155,20 @@ function colour(field, v) {
   return v === "hitting" ? "red" : "green";
 }
 function renderReview() {
-  const d = decide(rep.pitching, rep.impact, rep.wickets, state.onField, state.shot, rep.distance_rule);
+  const d = reviewDecision(rep, state.onField, state.shot);
+  const failed = rep.status && rep.status !== "ok";
   const steps = [];
-  let stopped = false;
-  const add = (k, v, col, note) => steps.push({ k, v, col: stopped ? "skip" : col, note });
+  let stopped = failed;
+  const add = (k, v, col, note) => steps.push({
+    k, v: failed ? "—" : v, col: stopped ? "skip" : col,
+    note: failed ? "Tracking unavailable" : note
+  });
   // 1 pitching
   add("PITCHING", pretty(rep.pitching), colour("pitching", rep.pitching),
       rep.pitching === "outside leg" ? "Pitched outside leg: NOT OUT. Stop here." :
       `bounce ${rep.bounce_xy_m[1].toFixed(2)} m from the stumps`);
   const fast = $("fast");
-  if (rep.pitching === "outside leg") {
+  if (!failed && rep.pitching === "outside leg") {
     stopped = true;
     fast.style.display = "block";
     fast.textContent = "Fast path: the ball pitched outside leg. Tell the TV umpire NOT OUT now; no further checks needed.";
@@ -181,7 +183,7 @@ function renderReview() {
   // 3 wickets
   const c = rep.wickets_confidence || {};
   add("WICKETS", pretty(rep.wickets), colour("wickets", rep.wickets),
-      `hitting ${(100 * (c.hitting || 0)).toFixed(0)}% · umpire's call ${(100 * (c["umpires call"] || 0)).toFixed(0)}% · missing ${(100 * (c.missing || 0)).toFixed(0)}% · ±${(200 * rep.stumps_sigma_m[0]).toFixed(1)} cm`);
+      `sampled paths: hitting ${(100 * (c.hitting || 0)).toFixed(0)}% · umpire's call ${(100 * (c["umpires call"] || 0)).toFixed(0)}% · missing ${(100 * (c.missing || 0)).toFixed(0)}% · ±${(200 * rep.stumps_sigma_m[0]).toFixed(1)} cm`);
   if (!stopped && rep.wickets === "missing") stopped = true;
   // 4 distance
   add("DISTANCE", rep.distance_rule ? `${rep.distance_rule.toUpperCase()} RULE` : "NO RULE",
@@ -192,12 +194,12 @@ function renderReview() {
     <span class="note">${s.note}</span></div>`).join("");
   // verdict
   const word = d.decision.toUpperCase();
-  const outcome = reviewOutcome(state.onField, d.decision, d.umpiresCall, state.by);
+  const outcome = failed ? "no tracking decision" : reviewOutcome(state.onField, d.decision, d.umpiresCall, state.by);
   const col = rep.wickets === "inconclusive" ? "grey" : d.umpiresCall ? "amber" : d.decision === "out" ? "red" : "green";
   const v = $("verdict");
   v.style.background = `var(--${col})`;
   v.innerHTML = `<div class="big">${d.umpiresCall ? (rep.wickets === "inconclusive" ? "NO DECISION" : "UMPIRE'S CALL") : word}</div>
-    <div class="small">${d.umpiresCall ? word + " · on-field decision stands · " : ""}${d.reason}</div>
+    <div class="small">${failed ? word + " · " : d.umpiresCall ? word + " · on-field decision stands · " : ""}${d.reason}</div>
     <div class="small" style="margin-top:4px">review: ${outcome}</div>`;
   state.final = d; state.outcome = outcome;
   for (const [id, key] of [["by", "by"], ["onfield", "onField"], ["shot", "shot"]])
@@ -216,6 +218,12 @@ function showReplay() {
   $("replay").src = `${D.replay}?embed=1&onfield=${encodeURIComponent(state.onField)}&shot=${state.shot ? 1 : 0}`;
 }
 $("toReplay").onclick = showReplay;
+$("showData").onclick = () => {
+  const panel = $("measurementPanel");
+  panel.open = true;
+  panel.scrollIntoView({ block: "nearest" });
+  panel.querySelector("summary").focus({ preventScroll: true });
+};
 
 // ---------------------------------------------------------------- review log (this browser only; export to keep)
 const LOGKEY = "cbt-review-log";
@@ -336,6 +344,10 @@ const spdTxt = rep.release_speed_kmh != null ? `Release speed <b>${rep.release_s
 $("quality").innerHTML = `${spdTxt} · ${rep.method ? rep.method + " · " : ""}${rep.n_inliers}/${rep.n_obs} detections used ·
   ${rep.n_after_bounce !== undefined ? rep.n_after_bounce + " after the bounce · " : ""}reprojection rms ${rep.rms_px} px ·
   bounce ±${(200 * rep.bounce_sigma_m[1]).toFixed(1)} cm (2σ)`;
+for (const values of D.decision_data) {
+  const row = $("decisionData").insertRow();
+  for (const value of values) row.insertCell().textContent = value;
+}
 renderReview(); renderLog(); showReplay(); range(); setT(D.times.release);
 window.CONSOLE = { decide, setT, state };
 </script>
